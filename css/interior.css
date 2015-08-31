@@ -1,0 +1,380 @@
+@charset "UTF-8";@font-face{font-family:Federo;font-style:normal;font-weight:400;src:local('Federo'),local('Federo-Regular'),url(http://fonts.gstatic.com/s/federo/v8/FnU7BHlDZgmlIL4FzGh7QA.woff) format('woff')}body,html{margin:0;overflow:hidden;max-width:100%;max-height:100%;overflow-x:hidden;-webkit-touch-callout:none;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}body{font-family:Federo,sans-serif;background-color:#333}#wrapper{width:100%;height:100%;position:absolute;top:0;left:0;background-color:#333}#viewport{position:absolute;z-index:1;opacity:0}#toolBarTop{width:220px;height:40px;top:5px;left:5px;z-index:14;position:absolute}#toolBarBottom{position:absolute;z-index:11;width:130px;height:40px;opacity:0;visibility:hidden}#mouseBlocker{width:100%;height:100%;position:absolute;z-index:20}#progressBGInit{width:100%;height:100%;position:absolute;z-index:15;background-color:#333}#progressBGRooms{width:100%;height:100%;position:absolute;z-index:15;background:rgba(0,0,0,.7);opacity:0}#mainProgress{opacity:0}#mainProgress,#progressRoomsLoad{width:240px;height:108px;position:absolute;z-index:16;top:50%;left:50%;margin-top:-54px;margin-left:-120px}#mainProgress img,#progressRoomsLoad img{width:240px;height:108px}#barInit,#imageBar,#modelsBar{width:0;height:8px;background-color:#f30;top:95px;left:13px;z-index:18;position:absolute}#barBG,#barBGInit{width:214px;height:8px;background-color:#333;top:95px;left:13px;z-index:17;position:absolute}#mainMenu{position:absolute;width:930px;height:350px;opacity:1;top:50%;left:50%;margin-left:-465px;margin-top:-110px}#title{width:610px;height:80px;position:absolute;margin-top:-130px;margin-left:160px}.mainMenuButton{width:225px;height:300px;position:absolute}.textContainer{bottom:0;height:50px;width:225px;text-align:center;line-height:50px;position:absolute;color:#eee;background-color:#111;font-size:1em;pointer-events:none}.innerGlow{width:225px;height:350px;position:absolute;opacity:1}.innerGlow:hover{cursor:pointer!important}.button{text-align:center;width:40px;height:40px;position:absolute;background-color:#111;color:#eee;line-height:40px;font-size:.7em;-webkit-transition:background-color .2s linear;-moz-transition:background-color .2s linear;-ms-transition:background-color .2s linear;-o-transition:background-color .2s linear;transition:background-color .2s linear;-webkit-border-radius:20px;-moz-border-radius:20px;-o-border-radius:20px;-ms-border-radius:20px;border-radius:20px}.button img{width:40px;height:40px}.button:hover{cursor:pointer!important;background-color:#f30;-webkit-transition:background-color .2s linear;-moz-transition:background-color .2s linear;-ms-transition:background-color .2s linear;-o-transition:background-color .2s linear;transition:background-color .2s linear}#bathroom,#bedroom,#kitchen,#livingroom{width:310px;height:100%;max-width:310px;max-height:100%;overflow-x:hidden;overflow-y:scroll;position:fixed;z-index:11;background-color:#111;color:#eee;font-size:1em;right:-310px;top:0}.textureButton{width:50px;height:50px;opacity:.7;position:absolute;-webkit-transition:opacity .2s linear;-o-transition:opacity .2s linear;-moz-transition:opacity .2s linear;-ms-transition:opacity .2s linear;transition:opacity .2s linear}.textureButton img{width:50px;height:50px}.textureButton:hover{opacity:1;cursor:pointer;-webkit-transition:opacity .2s linear;-o-transition:opacity .2s linear;-moz-transition:opacity .2s linear;-ms-transition:opacity .2s linear;transition:opacity .2s linear}#customizeButton{width:110px;height:40px;position:absolute;background-color:#111;color:#eee;z-index:11;line-height:40px;text-align:center;font-size:.7em;right:0;bottom:5px;-webkit-transition:background-color .2s linear;-moz-transition:background-color .2s linear;-ms-transition:background-color .2s linear;-o-transition:background-color .2s linear;transition:background-color .2s linear;-webkit-border-radius:20px 0 0 20px;-moz-border-radius:20px 0 0 20px;-o-border-radius:20px 0 0 20px;-ms-border-radius:20px 0 0 20px;border-radius:20px 0 0 20px}#customizeButton:hover{cursor:pointer;background-color:#f30;-webkit-transition:background-color .2s linear;-moz-transition:background-color .2s linear;-ms-transition:background-color .2s linear;-o-transition:background-color .2s linear;transition:background-color .2s linear}#transitionSprite{width:100%;height:100%;position:absolute;z-index:13;background-color:#333;opacity:0}@media screen and (max-device-width:640px){#mainMenu{position:absolute;width:465px;height:175px;opacity:1;top:50%;left:50%;margin-left:-232px;margin-top:-55px}#title{width:305px;height:40px;position:absolute;margin-left:80px;margin-top:-72px}#title img{width:305px;height:60px}.mainMenuButton{width:112px;height:150px;position:absolute}.textContainer{bottom:0;width:112px;height:25px;text-align:center;line-height:25px;position:absolute;color:#eee;background-color:#111;font-size:.6em;pointer-events:none}.innerGlow{width:112px;height:175px;position:absolute;opacity:1}.innerGlow img{width:112px;height:175px}.innerGlow:hover{cursor:pointer!important}}@media screen and (min-device-width:570px) and (max-device-width:1024px){#mainMenu{position:absolute;width:651px;height:245px;opacity:1;top:50%;left:50%;margin-left:-325px;margin-top:-78px}#title{width:427px;height:56px;position:absolute;margin-left:114px;margin-top:-92px}#title img{width:427px;height:84px}.mainMenuButton{width:158px;height:210px;position:absolute}.textContainer{bottom:0;width:158px;height:35px;text-align:center;line-height:35px;position:absolute;color:#eee;background-color:#111;font-size:.8em;pointer-events:none}.innerGlow{width:158px;height:245px;position:absolute;opacity:1}.innerGlow img{width:158px;height:245px}.innerGlow:hover{cursor:pointer!important}}
+@charset "UTF-8";
+@font-face {
+    font-family: Federo;
+    font-style: normal;
+    font-weight: 400;
+    src: local('Federo'), local('Federo-Regular'), url(http://fonts.gstatic.com/s/federo/v8/FnU7BHlDZgmlIL4FzGh7QA.woff) format('woff')
+}
+body,
+html {
+    margin: 0;
+    overflow: hidden;
+    max-width: 100%;
+    max-height: 100%;
+    overflow-x: hidden;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none
+}
+body {
+    font-family: Federo, sans-serif;
+    background-color: #333
+}
+#wrapper {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: #333
+}
+#viewport {
+    position: absolute;
+    z-index: 1;
+    opacity: 0
+}
+#toolBarTop {
+    width: 220px;
+    height: 40px;
+    top: 5px;
+    left: 5px;
+    z-index: 14;
+    position: absolute
+}
+#toolBarBottom {
+    position: absolute;
+    z-index: 11;
+    width: 130px;
+    height: 40px;
+    opacity: 0;
+    visibility: hidden
+}
+#mouseBlocker {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 20
+}
+#progressBGInit {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 15;
+    background-color: #333
+}
+#progressBGRooms {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 15;
+    background: rgba(0, 0, 0, .7);
+    opacity: 0
+}
+#mainProgress {
+    opacity: 0
+}
+#mainProgress,
+#progressRoomsLoad {
+    width: 240px;
+    height: 108px;
+    position: absolute;
+    z-index: 16;
+    top: 50%;
+    left: 50%;
+    margin-top: -54px;
+    margin-left: -120px
+}
+#mainProgress img,
+#progressRoomsLoad img {
+    width: 240px;
+    height: 108px
+}
+#barInit,
+#imageBar,
+#modelsBar {
+    width: 0;
+    height: 8px;
+    background-color: #f30;
+    top: 95px;
+    left: 13px;
+    z-index: 18;
+    position: absolute
+}
+#barBG,
+#barBGInit {
+    width: 214px;
+    height: 8px;
+    background-color: #333;
+    top: 95px;
+    left: 13px;
+    z-index: 17;
+    position: absolute
+}
+#mainMenu {
+    position: absolute;
+    width: 930px;
+    height: 350px;
+    opacity: 1;
+    top: 50%;
+    left: 50%;
+    margin-left: -465px;
+    margin-top: -110px
+}
+#title {
+    width: 610px;
+    height: 80px;
+    position: absolute;
+    margin-top: -130px;
+    margin-left: 160px
+}
+.mainMenuButton {
+    width: 225px;
+    height: 300px;
+    position: absolute
+}
+.textContainer {
+    bottom: 0;
+    height: 50px;
+    width: 225px;
+    text-align: center;
+    line-height: 50px;
+    position: absolute;
+    color: #eee;
+    background-color: #111;
+    font-size: 1em;
+    pointer-events: none
+}
+.innerGlow {
+    width: 225px;
+    height: 350px;
+    position: absolute;
+    opacity: 1
+}
+.innerGlow:hover {
+    cursor: pointer!important
+}
+.button {
+    text-align: center;
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    background-color: #111;
+    color: #eee;
+    line-height: 40px;
+    font-size: .7em;
+    -webkit-transition: background-color .2s linear;
+    -moz-transition: background-color .2s linear;
+    -ms-transition: background-color .2s linear;
+    -o-transition: background-color .2s linear;
+    transition: background-color .2s linear;
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    -o-border-radius: 20px;
+    -ms-border-radius: 20px;
+    border-radius: 20px
+}
+.button img {
+    width: 40px;
+    height: 40px
+}
+.button:hover {
+    cursor: pointer!important;
+    background-color: #f30;
+    -webkit-transition: background-color .2s linear;
+    -moz-transition: background-color .2s linear;
+    -ms-transition: background-color .2s linear;
+    -o-transition: background-color .2s linear;
+    transition: background-color .2s linear
+}
+#bathroom,
+#bedroom,
+#kitchen,
+#livingroom {
+    width: 310px;
+    height: 100%;
+    max-width: 310px;
+    max-height: 100%;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    position: fixed;
+    z-index: 11;
+    background-color: #F0F3F4;
+    color: #eee;
+    font-size: 1em;
+    right: -310px;
+    top: 0
+}
+.textureButton {
+    width: 50px;
+    height: 50px;
+    opacity: .7;
+    position: absolute;
+    -webkit-transition: opacity .2s linear;
+    -o-transition: opacity .2s linear;
+    -moz-transition: opacity .2s linear;
+    -ms-transition: opacity .2s linear;
+    transition: opacity .2s linear
+}
+.textureButton img {
+    width: 50px;
+    height: 50px
+}
+.textureButton:hover {
+    opacity: 1;
+    cursor: pointer;
+    -webkit-transition: opacity .2s linear;
+    -o-transition: opacity .2s linear;
+    -moz-transition: opacity .2s linear;
+    -ms-transition: opacity .2s linear;
+    transition: opacity .2s linear
+}
+#customizeButton {
+    width: 110px;
+    height: 40px;
+    position: absolute;
+    background-color: #111;
+    color: #eee;
+    z-index: 11;
+    line-height: 40px;
+    text-align: center;
+    font-size: .7em;
+    right: 0;
+    bottom: 5px;
+    -webkit-transition: background-color .2s linear;
+    -moz-transition: background-color .2s linear;
+    -ms-transition: background-color .2s linear;
+    -o-transition: background-color .2s linear;
+    transition: background-color .2s linear;
+   /* -webkit-border-radius: 20px 0 0 20px;
+    -moz-border-radius: 20px 0 0 20px;
+    -o-border-radius: 20px 0 0 20px;
+    -ms-border-radius: 20px 0 0 20px;
+    border-radius: 20px 0 0 20px*/
+}
+#customizeButton:hover {
+    cursor: pointer;
+    background-color: #f30;
+    -webkit-transition: background-color .2s linear;
+    -moz-transition: background-color .2s linear;
+    -ms-transition: background-color .2s linear;
+    -o-transition: background-color .2s linear;
+    transition: background-color .2s linear
+}
+#transitionSprite {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 13;
+    background-color: #333;
+    opacity: 0
+}
+@media screen and (max-device-width: 640px) {
+    #mainMenu {
+        position: absolute;
+        width: 465px;
+        height: 175px;
+        opacity: 1;
+        top: 50%;
+        left: 50%;
+        margin-left: -232px;
+        margin-top: -55px
+    }
+    #title {
+        width: 305px;
+        height: 40px;
+        position: absolute;
+        margin-left: 80px;
+        margin-top: -72px
+    }
+    #title img {
+        width: 305px;
+        height: 60px
+    }
+    .mainMenuButton {
+        width: 112px;
+        height: 150px;
+        position: absolute
+    }
+    .textContainer {
+        bottom: 0;
+        width: 112px;
+        height: 25px;
+        text-align: center;
+        line-height: 25px;
+        position: absolute;
+        color: #eee;
+        background-color: #111;
+        font-size: .6em;
+        pointer-events: none
+    }
+    .innerGlow {
+        width: 112px;
+        height: 175px;
+        position: absolute;
+        opacity: 1
+    }
+    .innerGlow img {
+        width: 112px;
+        height: 175px
+    }
+    .innerGlow:hover {
+        cursor: pointer!important
+    }
+}
+@media screen and (min-device-width: 570px) and (max-device-width: 1024px) {
+    #mainMenu {
+        position: absolute;
+        width: 651px;
+        height: 245px;
+        opacity: 1;
+        top: 50%;
+        left: 50%;
+        margin-left: -325px;
+        margin-top: -78px
+    }
+    #title {
+        width: 427px;
+        height: 56px;
+        position: absolute;
+        margin-left: 114px;
+        margin-top: -92px
+    }
+    #title img {
+        width: 427px;
+        height: 84px
+    }
+    .mainMenuButton {
+        width: 158px;
+        height: 210px;
+        position: absolute
+    }
+    .textContainer {
+        bottom: 0;
+        width: 158px;
+        height: 35px;
+        text-align: center;
+        line-height: 35px;
+        position: absolute;
+        color: #eee;
+        background-color: #111;
+        font-size: .8em;
+        pointer-events: none
+    }
+    .innerGlow {
+        width: 158px;
+        height: 245px;
+        position: absolute;
+        opacity: 1
+    }
+    .innerGlow img {
+        width: 158px;
+        height: 245px
+    }
+    .innerGlow:hover {
+        cursor: pointer!important
+    }
+}

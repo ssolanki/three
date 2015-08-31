@@ -1,0 +1,91 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <title>Home Colors - Interactive 3D Interior Design</title>
+    <meta charset="UTF-8">
+    <meta name="name" content="Home Colors - Interactive 3D Interior Design">
+    <meta name="image" content="http://www.plus360degrees.com/jpgs/shareImageInteriorApt.jpg">
+    <meta name="description" content="Interior Design / Architecture lovers: Customize this interactive 3D home in realtime directly in the browser. WebGL experience made with threejs.">
+    <meta name="description" content="Interior Design / Architecture lovers: Customize this interactive 3D home in realtime directly in the browser. WebGL experience made with threejs." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Home Colors - Interactive 3D Interior Design">
+    <meta name="twitter:site" content="@plus360degrees">
+    <meta name="twitter:creator" content="@plus360degrees">
+    <meta name="twitter:image:src" content="http://www.plus360degrees.com/jpgs/shareImageInteriorApt.jpg">
+    <meta name="twitter:description" content="Interior Design / Architecture lovers: Customize this interactive 3D home in realtime directly in the browser. WebGL experience made with threejs.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Home Colors - Interactive 3D Interior Design" />
+    <meta property="og:image" content="http://www.plus360degrees.com/jpgs/shareImageInteriorApt.jpg" />
+    <meta property="og:url" content="http://homecolors.plus360degrees.com/" />
+    <meta property="og:description" content="Interior Design / Architecture lovers: Customize this interactive 3D home in realtime directly in the browser. WebGL experience made with threejs." />
+    <link rel="shortcut icon" href="http://www.plus360degrees.com/jpgs/interior.ico">
+    <link href="css/interior.css" rel="stylesheet" type="text/css" />
+     <link href="css/bootstrap.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    <div id='mouseBlocker'></div>
+    
+    <div id='progressBGInit'>
+    <div id="mainProgress"><div id="barBGInit"></div>
+    <div id="barInit"></div></div>
+    </div>
+
+    <div id="wrapper">
+        <div id="mainMenu" ></div>
+        <div id="viewport">
+          
+        </div>
+        <div id="progressBGRooms">
+            <div id="progressRoomsLoad">
+                <div id="barBG"></div>
+                <div id="imageBar" style="left: 13px; width: 0px;"></div>
+                <div id="modelsBar" style="left: 66px; width: 0px;"></div>
+                <!-- <img src="gui/retina/logoLoader.png"> -->
+            </div>
+        </div>
+        <div id="transitionSprite" ></div>
+
+        <div id="toolBarBottom" >
+            <!-- <a href="" class="btn btn-success btn-rounded font-bold"> Go Back</a> -->
+            <div id="bottomButton0" class="button" style="width: 100px;" onclick="init();">GO BACK</div>
+            <div id="bottomButton1" class="button" style="left: 105px;" ><img src="gui/infopointgui.png"></div>
+        </div>
+        <div id="customizeButton" style="opacity: 1; visibility: visible;">CUSTOMIZE &lt;</div> 
+    </div> 
+    <div id="livingroom">
+
+
+    </div>
+<!--     //  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r68/three.min.js"></script>
+    // <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.16.1/TweenMax.min.js"></script> -->
+   
+
+     <script type="text/javascript" src="js/three68.js"></script>
+      <script type="text/javascript" src="js/version.js"></script>
+     <script type="text/javascript" src="js/tween.min.js"></script>
+    <script type="text/javascript" src="js/sceneloader.js"></script>
+     <script type="text/javascript" src="js/mirrorold.js"></script>
+    
+    <script type="text/javascript" src="js/threeorbitals.js"></script>
+    <script type="text/javascript" src="js/pxLoader.js"></script>
+    <script type="text/javascript" src="js/pxloaderImage.js"></script>
+
+
+    <!-- // <script type="text/javascript" src="http://thinkpixellab.com/pxloader/js/PxLoaderImage.js"></script> -->
+     <script type="text/javascript" src="js/identifybrowser.js"></script>
+    <script type="text/javascript" src="js/filesaver.js"></script>
+     <script type="text/javascript" src="js/blobbuilder.js"></script>
+     <script type="text/javascript" src="js/canvastoblob.js"></script>
+      <script type="text/javascript" src="js/livingroomguibuilder.js"></script>
+       <script type="text/javascript" src="js/livingroomhandling.js"></script>
+  
+    <script type="text/javascript" src="js/main.js"></script>
+   
+    
+      
+</body>
+
+</html>

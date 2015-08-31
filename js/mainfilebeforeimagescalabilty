@@ -1,0 +1,2630 @@
+var P360D = P360D || {
+    MAYOR_VERSION: "0",
+    MINOR_VERSION: "4",
+    REVISION: "5"
+};
+
+P360D.DOM = function() {};
+P360D.DOM.div = function(id) {
+    if (document.getElementById(id) == null) {
+        var element = document.createElement("div");
+        element.id = id;
+        return element;
+    } else {
+        return document.getElementById(id)
+    }
+};
+P360D.DOM.canvas = function(id) {
+    if (document.getElementById(id) == null) {
+        var canvas = document.createElement("canvas");
+        canvas.id = id;
+        return canvas;
+    } else {
+        return document.getElementById(id)
+    }
+};
+P360D.DOM.element = function(type, id) {
+    var element = document.createElement(type);
+    element.id = id;
+    return element;
+};
+P360D.Utils = function() {};
+
+P360D.Utils.randomNumber = function(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min) // returns a random number between min and max
+};
+P360D.Utils.loadJSON = function(url, callback, error) {
+    var req = new XMLHttpRequest();
+    req.overrideMimeType("application/json");
+    req.onreadystatechange = function() {
+        if (req.readyState === 4) {
+            if (req.status === 200) {
+                if (callback) {
+                    callback(JSON.parse(req.responseText))
+                }
+            } else {
+                if (error) {
+                    error(req)
+                }
+            }
+        }
+    };
+    req.open("GET", url, true);
+    req.send();
+};
+P360D.Utils.loadJSON1 = function(url, callback) {
+    var req = new XMLHttpRequest();
+    req.overrideMimeType("application/json");
+    req.open("GET", url, true);
+    req.onreadystatechange = function() {
+        if (req.readyState == 4 && req.status == "200") {
+            callback(req.responseText)
+        }
+    };
+    req.send(null);
+};
+P360D.Utils.jsonToArray = function(json) {   
+    var objKeys = Object.keys(json);
+    objKeys.forEach(function(key) {
+        result.push(json[key])
+    });
+    return result;
+};
+
+P360D.MeshUtils = function() {};
+P360D.MeshUtils.loadMesh = function(geometry, material) {
+    var mesh = new THREE.Mesh(geometry, material);
+    return mesh;
+};
+P360D.MeshUtils.toggleObject3D = function(_0x1fbcx2b, visible) {
+    _0x1fbcx2b.traverse(function(object) {
+        object.visible = visible
+    })
+};
+P360D.TextureUtils = function() {};
+P360D.TextureUtils.loadTexture = function(path, anisotropy, callback) {
+    var texture = THREE.ImageUtils.loadTexture(path, undefined, callback);
+    texture.anisotropy = anisotropy || 8;
+    return texture;
+};
+P360D.TextureUtils.loadRepeatableTexture = function(path, _0x1fbcx31, _0x1fbcx32, anisotropy, callback) {
+    var texture = THREE.ImageUtils.loadTexture(path, undefined, callback);
+    texture.anisotropy = anisotropy || 8;
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(_0x1fbcx31, _0x1fbcx32);
+    return texture;
+};
+P360D.TextureUtils.loadCubeTextures = function(_0x1fbcx33, anisotropy, callback) {
+    var _0x1fbcx34 = THREE.ImageUtils.loadTextureCube(_0x1fbcx33, undefined, callback);
+    _0x1fbcx34.format = THREE.RGBFormat;
+    _0x1fbcx34.anisotropy = anisotropy || 0;
+    return _0x1fbcx34;
+};
+P360D.TextureUtils.loadTextureCubeProcedurally = function(_0x1fbcx33, anisotropy, callback) {
+    var imageIndex = 0;
+    var _0x1fbcx34 = [];
+
+    function _0x1fbcx35() {
+        imageIndex++;
+        if (callback && imageIndex == _0x1fbcx33.length) {
+            for (var i = 0; i < _0x1fbcx33.length; i++) {
+                _0x1fbcx34[i].needsUpdate = true
+            };
+            callback();
+        };
+    }
+    for (var _0x1fbcx36 = 0; _0x1fbcx36 < _0x1fbcx33.length; _0x1fbcx36++) {
+        var texture = P360D.TextureUtils.loadTexture(_0x1fbcx33[_0x1fbcx36], anisotropy, _0x1fbcx35);
+        _0x1fbcx34.push(texture);
+    };
+    return _0x1fbcx34;
+};
+P360D.TextureUtils.renderToTexture = function(renderer, scene, camera) {
+    var image = new Image();
+    renderer.clear();
+    renderer.render(scene, camera);
+    image.src = renderer.context.canvas.toDataURL("image/jpeg");
+    image.addEventListener(Event.LOAD, function(event) {
+        var canvas = P360D.DOM.canvas("c"),
+            _0x1fbcx3b = canvas.getContext("2d");
+        canvas.width = _0x1fbcx3b.width = 1024;
+        canvas.height = _0x1fbcx3b.height = 1024;
+        _0x1fbcx3b.drawImage(event.currentTarget, 0, 0, 1024, 1024);
+        var _0x1fbcx3c = new THREE.Texture(canvas);
+        _0x1fbcx3c.needsUpdate = true;
+        return _0x1fbcx3c;
+    });
+};
+P360D.GeometryUtils = function() {};
+P360D.SceneUtils = function() {};
+P360D.SceneUtils.geopositionToVector3 = function(_0x1fbcx3d, _0x1fbcx3e, _0x1fbcx3f) {
+    var phi = (_0x1fbcx3d) * Math.PI / 180;
+    var theta = (_0x1fbcx3e - 180) * Math.PI / 180;
+    var _0x1fbcx42 = -(_0x1fbcx3f) * Math.cos(phi) * Math.cos(theta);
+    var _0x1fbcx43 = (_0x1fbcx3f) * Math.sin(phi);
+    var _0x1fbcx44 = (_0x1fbcx3f) * Math.cos(phi) * Math.sin(theta);
+    return new THREE.Vector3(_0x1fbcx42, _0x1fbcx43, _0x1fbcx44);
+};
+
+P360D.MouseEvent3DManager = function(camera, domElement) {
+    this._camera = camera || null;
+    this.domElement = domElement || document;
+    this._projector = new THREE.Projector();
+    this._selected = null;
+    this._boundObjs = [];
+    var scope = this;
+    scope.mouseX, scope.mouseY;
+    this.init = function() {
+        this.clickEvent = touchSupport ? TouchEvent.TOUCH_START : MouseEvent.CLICK;
+        this.startEvent = touchSupport ? TouchEvent.TOUCH_START : MouseEvent.MOUSE_DOWN;
+        this.moveEvent = touchSupport ? TouchEvent.TOUCH_MOVE : MouseEvent.MOUSE_MOVE;
+        this.endEvent = touchSupport ? TouchEvent.TOUCH_END : MouseEvent.MOUSE_UP;
+        this._onClick = function() {
+            scope.onClick.apply(scope, arguments)
+        };
+        this._onDblClick = function() {
+            scope.onDblClick.apply(scope, arguments)
+        };
+        this._onMouseMove = function() {
+            scope.onMouseMove.apply(scope, arguments)
+        };
+        this._onMouseDown = function() {
+            scope.onMouseDown.apply(scope, arguments)
+        };
+        this._onMouseUp = function() {
+            scope.onMouseUp.apply(scope, arguments)
+        };
+        this._onTouchMove = function() {
+            scope.onTouchMove.apply(scope, arguments)
+        };
+        this._onTouchStart = function() {
+            scope.onTouchStart.apply(scope, arguments)
+        };
+        this._onTouchEnd = function() {
+            scope.onTouchEnd.apply(scope, arguments)
+        };
+    };
+    this.objectContextInit = function(_0x1fbcx2b) {
+        _0x1fbcx2b.domEvent = {}
+    };
+    this.objectContextDelete = function(_0x1fbcx2b) {
+        delete _0x1fbcx2b.domEvent
+    };
+    this.objectContextIsInit = function(_0x1fbcx2b) {
+        return _0x1fbcx2b.domEvent ? true : false
+    };
+    this.objectContextGet = function(_0x1fbcx2b) {
+        return _0x1fbcx2b.domEvent
+    };
+    this.camera = function(value) {
+        if (value) {
+            this._camera = value
+        };
+        return this._camera;
+    };
+    this.bind = function(_0x1fbcx2b, _0x1fbcx47, callback, _0x1fbcx15) {
+        if (!this.objectContextIsInit(_0x1fbcx2b)) {
+            this.objectContextInit(_0x1fbcx2b)
+        };
+        var _0x1fbcx48 = this.objectContextGet(_0x1fbcx2b);
+        if (!_0x1fbcx48[_0x1fbcx47 + "Handlers"]) {
+            _0x1fbcx48[_0x1fbcx47 + "Handlers"] = []
+        };
+        _0x1fbcx48[_0x1fbcx47 + "Handlers"].push({
+            callback: callback,
+            useCapture: _0x1fbcx15
+        });
+        this._boundObjs.push(_0x1fbcx2b);
+    };
+    this.unbind = function(_0x1fbcx2b, _0x1fbcx47, callback, _0x1fbcx15) {
+        if (!this.objectContextIsInit(_0x1fbcx2b)) {
+            this.objectContextInit(_0x1fbcx2b)
+        };
+        var _0x1fbcx48 = this.objectContextGet(_0x1fbcx2b);
+        if (!_0x1fbcx48[_0x1fbcx47 + "Handlers"]) {
+            _0x1fbcx48[_0x1fbcx47 + "Handlers"] = []
+        };
+        var _0x1fbcx49 = _0x1fbcx48[_0x1fbcx47 + "Handlers"];
+        for (var i = 0; i < _0x1fbcx49.length; i++) {
+            var _0x1fbcx4a = _0x1fbcx49[i];
+            if (callback != _0x1fbcx4a.callback) {
+                continue
+            };
+            if (_0x1fbcx15 != _0x1fbcx4a.useCapture) {
+                continue
+            };
+            _0x1fbcx49.splice(i, 1);
+            break;
+        };
+        var imageIndex = this._boundObjs.indexOf(_0x1fbcx2b);
+        this._boundObjs.splice(imageIndex, 1);
+    };
+    this.bound = function(_0x1fbcx47, _0x1fbcx2b) {
+        var _0x1fbcx48 = this.objectContextGet(_0x1fbcx2b);
+        if (!_0x1fbcx48) {
+            return false
+        };
+        return _0x1fbcx48[_0x1fbcx47 + "Handlers"] ? true : false;
+    };
+    this.onMove = function(_0x1fbcx4b, _0x1fbcx4c, _0x1fbcx4d) {
+        var _0x1fbcx4e = new THREE.Vector3(_0x1fbcx4b, _0x1fbcx4c, 1);
+        this._projector.unprojectVector(_0x1fbcx4e, this._camera);
+        var _0x1fbcx4f = new THREE.Raycaster(this._camera.position, _0x1fbcx4e.sub(this._camera.position).normalize());
+        var _0x1fbcx50 = _0x1fbcx4f.intersectObjects(this._boundObjs);
+        var _0x1fbcx51 = this._selected;
+        if (_0x1fbcx50.length > 0) {
+            var _0x1fbcx52 = _0x1fbcx50[0];
+            var _0x1fbcx53 = _0x1fbcx52.object;
+            this._selected = _0x1fbcx53;
+            var _0x1fbcx54, _0x1fbcx55;
+            if (_0x1fbcx51 != _0x1fbcx53) {
+                _0x1fbcx54 = this.bound(MouseEvent.MOUSE_OVER, _0x1fbcx53);
+                _0x1fbcx55 = _0x1fbcx51 && this.bound(MouseEvent.MOUSE_OUT, _0x1fbcx51);
+            };
+        } else {
+            _0x1fbcx55 = _0x1fbcx51 && this.bound(MouseEvent.MOUSE_OUT, _0x1fbcx51);
+            this._selected = null;
+        };
+        _0x1fbcx54 && this.notify(MouseEvent.MOUSE_OVER, _0x1fbcx53, _0x1fbcx4d);
+        _0x1fbcx55 && this.notify(MouseEvent.MOUSE_OUT, _0x1fbcx51, _0x1fbcx4d);
+    };
+    this.onEvent = function(_0x1fbcx47, _0x1fbcx4b, _0x1fbcx4c, _0x1fbcx4d) {
+        var _0x1fbcx4e = new THREE.Vector3(_0x1fbcx4b, _0x1fbcx4c, 1);
+        this._projector.unprojectVector(_0x1fbcx4e, this._camera);
+        _0x1fbcx4e.sub(this._camera.position).normalize();
+        var _0x1fbcx4f = new THREE.Raycaster(this._camera.position, _0x1fbcx4e);
+        var _0x1fbcx50 = _0x1fbcx4f.intersectObjects(this._boundObjs);
+        if (_0x1fbcx50.length === 0) {
+            return
+        };
+        var _0x1fbcx52 = _0x1fbcx50[0];
+        var _0x1fbcx2b = _0x1fbcx52.object;
+        var _0x1fbcx48 = this.objectContextGet(_0x1fbcx2b);
+        if (!_0x1fbcx48) {
+            return
+        };
+        this.notify(_0x1fbcx47, _0x1fbcx2b, _0x1fbcx4d);
+    };
+    this.notify = function(_0x1fbcx47, _0x1fbcx2b, _0x1fbcx4d) {
+        var _0x1fbcx48 = this.objectContextGet(_0x1fbcx2b);
+        var _0x1fbcx49 = _0x1fbcx48 ? _0x1fbcx48[_0x1fbcx47 + "Handlers"] : null;
+        if (!_0x1fbcx48 || !_0x1fbcx49 || _0x1fbcx49.length === 0) {
+            _0x1fbcx2b.parent && this.notify(_0x1fbcx47, _0x1fbcx2b.parent);
+            return;
+        };
+        var _0x1fbcx49 = _0x1fbcx48[_0x1fbcx47 + "Handlers"];
+        for (var i = 0; i < _0x1fbcx49.length; i++) {
+            var _0x1fbcx4a = _0x1fbcx49[i];
+            var _0x1fbcx56 = true;
+            var _0x1fbcx57 = true;
+            _0x1fbcx4a.callback({
+                type: _0x1fbcx47,
+                target: _0x1fbcx2b,
+                currentTarget: _0x1fbcx2b,
+                origDomEvent: _0x1fbcx4d,
+                stopPropagation: function() {
+                    _0x1fbcx56 = false
+                },
+                preventDefault: function() {
+                    _0x1fbcx57 = false
+                }
+            });
+            if (!_0x1fbcx56) {
+                continue
+            };
+            if (!_0x1fbcx57) {
+                continue
+            };
+            if (_0x1fbcx4a.useCapture === false) {
+                _0x1fbcx2b.parent && this.notify(_0x1fbcx47, _0x1fbcx2b.parent)
+            };
+        };
+    };
+    this.onMouseDown = function(event) {
+        return this.onMouseEvent(MouseEvent.MOUSE_DOWN, event)
+    };
+    this.onMouseUp = function(event) {
+        return this.onMouseEvent(MouseEvent.MOUSE_UP, event)
+    };
+    this.onMouseEvent = function(_0x1fbcx47, _0x1fbcx58) {
+        var _0x1fbcx4b = +(_0x1fbcx58.clientX / window.innerWidth) * 2 - 1;
+        var _0x1fbcx4c = -(_0x1fbcx58.clientY / window.innerHeight) * 2 + 1;
+        scope.mouseX = _0x1fbcx58.clientX;
+        scope.mouseY = _0x1fbcx58.clientY;
+        return this.onEvent(_0x1fbcx47, _0x1fbcx4b, _0x1fbcx4c, _0x1fbcx58);
+    };
+    this.onMouseMove = function(_0x1fbcx58) {
+        var _0x1fbcx4b = +(_0x1fbcx58.clientX / window.innerWidth) * 2 - 1;
+        var _0x1fbcx4c = -(_0x1fbcx58.clientY / window.innerHeight) * 2 + 1;
+        return this.onMove(_0x1fbcx4b, _0x1fbcx4c, _0x1fbcx58);
+    };
+    this.onClick = function(event) {
+        return this.onMouseEvent(MouseEvent.CLICK, event)
+    };
+    this.onDblClick = function(event) {
+        return this.onMouseEvent(MouseEvent.DOUBLE_CLICK, event)
+    };
+    this.onTouchStart = function(event) {
+        return this.onTouchEvent(TouchEvent.TOUCH_START, event)
+    };
+    this.onTouchEnd = function(event) {
+        return this.onTouchEvent(TouchEvent.TOUCH_END, event)
+    };
+    this.onTouchMove = function(_0x1fbcx58) {
+        if (_0x1fbcx58.touches.length != 1) {
+            return undefined
+        };
+        var _0x1fbcx4b = +(_0x1fbcx58.touches[0].pageX / window.innerWidth) * 2 - 1;
+        var _0x1fbcx4c = -(_0x1fbcx58.touches[0].pageY / window.innerHeight) * 2 + 1;
+        return this.onMove(_0x1fbcx4b, _0x1fbcx4c, _0x1fbcx58);
+    };
+    this.onTouchEvent = function(_0x1fbcx47, _0x1fbcx58) {
+        if (_0x1fbcx58.touches.length != 1) {
+            return undefined
+        };
+        var _0x1fbcx4b = +(_0x1fbcx58.touches[0].pageX / window.innerWidth) * 2 - 1;
+        var _0x1fbcx4c = -(_0x1fbcx58.touches[0].pageY / window.innerHeight) * 2 + 1;
+        return this.onEvent(_0x1fbcx47, _0x1fbcx4b, _0x1fbcx4c, _0x1fbcx58);
+    };
+    this.enabled = function(value) {
+        if (value) {
+            this.domElement.addEventListener(this.clickEvent, this._onClick, false);
+            this.domElement.addEventListener(MouseEvent.DOUBLE_CLICK, this._onDblClick, false);
+            this.domElement.addEventListener(this.moveEvent, this._onMouseMove, false);
+            this.domElement.addEventListener(this.startEvent, this._onMouseDown, false);
+            this.domElement.addEventListener(this.endEvent, this._onMouseUp, false);
+            this.domElement.addEventListener(TouchEvent.TOUCH_MOVE, this._onTouchMove, false);
+            this.domElement.addEventListener(TouchEvent.TOUCH_START, this._onTouchStart, false);
+            this.domElement.addEventListener(TouchEvent.TOUCH_END, this._onTouchEnd, false);
+        } else {
+            this.domElement.removeEventListener(this.clickEvent, this._onClick, false);
+            this.domElement.removeEventListener(MouseEvent.DOUBLE_CLICK, this._onDblClick, false);
+            this.domElement.removeEventListener(this.moveEvent, this._onMouseMove, false);
+            this.domElement.removeEventListener(this.startEvent, this._onMouseDown, false);
+            this.domElement.removeEventListener(this.endEvent, this._onMouseUp, false);
+            this.domElement.removeEventListener(TouchEvent.TOUCH_MOVE, this._onTouchMove, false);
+            this.domElement.removeEventListener(TouchEvent.TOUCH_START, this._onTouchStart, false);
+            this.domElement.removeEventListener(TouchEvent.TOUCH_END, this._onTouchEnd, false);
+        }
+    };
+    this.init();
+    this.enabled(true);
+};
+P360D.InteractiveScene = function(camera, domElement) {
+    var _0x1fbcx59 = function() {
+        _0x1fbcx59.symbols.forEach(function(_0x1fbcx5a) {
+            THREE.Object3D.prototype[_0x1fbcx5a] = _0x1fbcx59.previous[_0x1fbcx5a]
+        })
+    };
+    _0x1fbcx59.symbols = ["addEventListener", "removeEventListener"];
+    _0x1fbcx59.previous = {};
+    _0x1fbcx59.symbols.forEach(function(_0x1fbcx5a) {
+        _0x1fbcx59.previous[_0x1fbcx5a] = THREE.Object3D.prototype[_0x1fbcx5a]
+    });
+    THREE.Object3D.domEvent = new P360D.MouseEvent3DManager(camera, domElement);
+    THREE.Object3D.prototype.addEventListener = function(_0x1fbcx47, callback, _0x1fbcx15) {
+        THREE.Object3D.domEvent.bind(this, _0x1fbcx47, callback, _0x1fbcx15);
+        return this;
+    };
+    THREE.Object3D.prototype.removeEventListener = function(_0x1fbcx47, callback, _0x1fbcx15) {
+        THREE.Object3D.domEvent.unbind(this, _0x1fbcx47, callback, _0x1fbcx15);
+        return this;
+    };
+    this.enabled = function(value) {
+        THREE.Object3D.domEvent.enabled(value)
+    };
+    this.setCamera = function(value) {
+        THREE.Object3D.domEvent.camera(value)
+    };
+    this.mouseX = function() {
+        return THREE.Object3D.domEvent.mouseX
+    };
+    this.mouseY = function() {
+        return THREE.Object3D.domEvent.mouseY
+    };
+};
+var Keyboard = {
+    A: 65,
+    B: 66,
+    C: 67,
+    D: 68,
+    E: 69, 
+    F: 70,
+    G: 71,
+    H: 72,
+    I: 73,
+    J: 74,
+    K: 75,
+    L: 76,
+    M: 77,
+    N: 78,
+    O: 79,
+    P: 80,
+    Q: 81,
+    R: 82,
+    S: 83,
+    T: 84,
+    U: 85,
+    V: 86,
+    W: 87,
+    X: 88,
+    Y: 89,
+    Z: 90,
+    NUMBER_0: 48,
+    NUMBER_1: 49,
+    NUMBER_2: 50,
+    NUMBER_3: 51,
+    NUMBER_4: 52,
+    NUMBER_5: 53,
+    NUMBER_6: 54,
+    NUMBER_7: 55,
+    NUMBER_8: 56,
+    NUMBER_9: 57,
+    NUMPAD_0: 45,
+    NUMPAD_1: 35,
+    NUMPAD_2: 40,
+    NUMPAD_3: 34,
+    NUMPAD_4: 37,
+    NUMPAD_5: 12,
+    NUMPAD_6: 39,
+    NUMPAD_7: 36,
+    NUMPAD_8: 38,
+    NUMPAD_9: 33,
+    NUMPAD_ADD: 107,
+    NUMPAD_SUBTRACT: 109,
+    NUMPAD_MULTIPLY: 106,
+    NUMPAD_DECIMAL: 110,
+    NUMPAD_DIVIDE: 111,
+    NUMPAD_ENTER: 13,
+    UP: 38,
+    DOWN: 40,
+    LEFT: 37,
+    RIGHT: 39,
+    PAGE_UP: 33,
+    PAGE_DOWN: 34,
+    ESCAPE: 27,
+    ENTER: 13,
+    SHIFT: 16,
+    CONTROL: 17,
+    ALT: 18,
+    INSERT: 45,
+    DELETE: 46,
+    HOME: 36,
+    END: 35,
+    NUMBER_PAD_LOCK: 144,
+    BACKSPACE: 8,
+    F1: 112,
+    F2: 113,
+    F3: 114,
+    F4: 115,
+    F5: 116,
+    F6: 117,
+    F7: 118,
+    F8: 119,
+    F9: 120,
+    F10: 121,
+    F11: 122,
+    F12: 123
+};
+var MouseEvent = {
+    CLICK: "click",
+    DOUBLE_CLICK: "dblclick",
+    MOUSE_OVER: "mouseover",
+    MOUSE_OUT: "mouseout",
+    MOUSE_ENTER: "mouseenter",
+    MOUSE_LEAVE: "mouseleave",
+    ROLL_OVER: "mouseenter",
+    ROLL_OUT: "mouseleave",
+    MOUSE_DOWN: "mousedown",
+    MOUSE_UP: "mouseup",
+    MOUSE_MOVE: "mousemove",
+    WHEEL: "wheel",
+    MOUSE_WHEEL: "mousewheel",
+    DOM_MOUSE_SCROLL: "DOMMouseScroll",
+    DRAG: "drag",
+    DRAG_START: "dragstart",
+    DRAG_END: "dragend",
+    DRAG_ENTER: "dragenter",
+    DRAG_EXIT: "dragexit",
+    DRAG_OVER: "dragover",
+    DROP: "drop"
+};
+var TouchEvent = {
+    TOUCH_START: "touchstart",
+    TOUCH_END: "touchend",
+    TOUCH_MOVE: "touchmove",
+    TOUCH_CANCEL: "touchcancel"
+};
+var Event = {
+    EVENT: "Event",
+    LOAD: "load",
+    LOAD_START: "loadstart",
+    BEFORE_UNLOAD: "beforeunload",
+    UNLOAD: "unload",
+    LOADED_DATA: "loadeddata",
+    LOADED_METADATA: "loadedmetadata",
+    DOM_ACTIVE: "DOMActive",
+    ABORT: "abort",
+    ERROR: "error",
+    CANCEL: "cancel",
+    CLOSE: "close",
+    SELECT: "select",
+    RESIZE: "resize",
+    SCROLL: "scroll",
+    EMPTIED: "emptied",
+    DURATION_CHANGE: "durationchange",
+    INPUT: "input",
+    AFTER_PRINT: "afterprint",
+    BEFORE_PRINT: "beforeprint",
+    HASH_CHANGE: "hashchange",
+    MESSAGE: "message",
+    OFFLINE: "offline",
+    ONLINE: "online",
+    PAGE_HIDE: "pagehide",
+    PAGE_SHOW: "pageshow",
+    POP_STATE: "popstate",
+    STORAGE: "storage",
+    CONTEXT_MENU: "contextmenu",
+    BLUR: "blur",
+    DOM_FOCUS_IN: "DOMFocusIn",
+    DOM_FOCUS_OUT: "DOMFocusOut",
+    FOCUS: "focus",
+    FOCUS_IN: "focusin",
+    FOCUS_OUT: "focusout",
+    PROGRESS: "progress",
+    COMPLETE: "complete",
+    FULLSCREEN_CHANGE: "fullscreenchange"
+};
+var KeyboardEvent = {
+    KEY_DOWN: "keydown",
+    KEY_UP: "keyup",
+    KEY_PRESS: "keypress"
+};
+var Directions = {
+    UP: "up",
+    DOWN: "down",
+    LEFT: "left",
+    RIGHT: "right",
+    FRONT: "front",
+    BACK: "back",
+    CENTER: "center"
+};
+var ControllerType = {
+    AUTO_MIXED: "automixed",
+    AUTO_PAN_ONLY: "autopanonly",
+    AUTO_TILT_ONLY: "autotiltonly",
+    FREE: "free",
+    MIXED: "mixed",
+    CONSTRAINT: "constraint",
+    FIXED: "fixed"
+};
+// P360D.PanoramicControls = function(camera, domElement) {
+//         this.camera = (camera !== undefined) ? camera : console.error("PanoramicControls required a THREE.PerspectiveCamera in first argument.");
+//         this.domElement = (domElement !== undefined) ? domElement : document.body;
+//         this.target = new THREE.Vector3();
+//         this.minPolarAngle = 0.0;
+//         this.maxPolarAngle = 180.0;
+//         this.minPanAngle = -130.0;
+//         this.maxPanAngle = 90.0;
+//         this.deceleration = 0.88;
+//         this.steps = 15.0;
+//         this.zoomSpeed = 0.2;
+//         this.zoomSteps = 1.0;
+//         this.minZoom = this.camera.fov;
+//         this.maxZoom = 38.0;
+//         this.enabledZoom = true;
+//         this.constraintPan = true;
+//         this.yaw = -65.0;
+//         this.pitch = 100.0;
+//         var scope = this;
+//         var _0x1fbcx63 = false;
+//         var _0x1fbcx64 = new THREE.Vector2();
+//         var _0x1fbcx65 = new THREE.Vector2();
+//         var dollyStart = new THREE.Vector2();
+//         var dollyEnd = new THREE.Vector2();
+//         var dollyDelta = new THREE.Vector2();
+//         var phiDelta = 0.0;
+//         var thetaDelta = 0.0;
+//         var phi = this.pitch;
+//         var theta = this.yaw;
+//         var _0x1fbcx6b = this.camera.fov;
+//         var offset = 0.000001;
+//                         this.update = function() {
+//                             if (_0x1fbcx63) {
+//                                 thetaDelta = (_0x1fbcx64.x - _0x1fbcx65.x) / scope.steps;
+//                                 phiDelta = (_0x1fbcx64.y - _0x1fbcx65.y) / scope.steps;
+//                             };
+//                             phi += phiDelta;
+//                             theta += thetaDelta;
+//                             phi = Math.max(scope.minPolarAngle + offset, Math.min(scope.maxPolarAngle - offset, phi));
+//                             thetaDelta *= scope.deceleration;
+//                             phiDelta *= scope.deceleration;
+//                             if (scope.constraintPan) {
+//                                 theta = Math.max(this.minPanAngle, Math.min(this.maxPanAngle, theta))
+//                             };
+//                             var _0x1fbcx6d = this.target,
+//                                 position = this.camera.position;
+//                             _0x1fbcx6d.x = position.x + 100 * Math.sin(phi * Math.PI / 180) * Math.cos(theta * Math.PI / 180);
+//                             _0x1fbcx6d.y = position.y + 100 * Math.cos(phi * Math.PI / 180);
+//                             _0x1fbcx6d.z = position.z + 100 * Math.sin(phi * Math.PI / 180) * Math.sin(theta * Math.PI / 180);
+//                             this.camera.lookAt(_0x1fbcx6d);
+//                             _0x1fbcx64.copy(_0x1fbcx65);
+//                         };
+
+//                         function onMouseDown(event) {
+//                             event.preventDefault();
+//                             _0x1fbcx63 = true;
+//                             if (event.changedTouches || event.touches) {
+//                                 switch (event.touches.length) {
+//                                     case 1:
+//                                         _0x1fbcx64.set(event.changedTouches[0].pageX, event.changedTouches[0].pageY);
+//                                         _0x1fbcx65.copy(_0x1fbcx64);
+//                                         break;;
+//                                     case 2:
+//                                         if (scope.enabledZoom === false) {
+//                                             return
+//                                         };
+//                                         var dx = event.touches[0].pageX - event.touches[1].pageX;
+//                                         var dy = event.touches[0].pageY - event.touches[1].pageY;
+//                                         var distance = Math.sqrt(dx * dx + dy * dy);
+//                                         dollyStart.set(0, distance);
+//                                         break;;
+//                                 }
+//                             } else {
+//                                 _0x1fbcx64.set(event.clientX, event.clientY);
+//                                 _0x1fbcx65.copy(_0x1fbcx64);
+//                             };
+//                             event.stopPropagation();
+//                         }
+
+//                         function onMouseMove(event) {
+//                             event.preventDefault();
+//                             if (event.changedTouches || event.touches) {
+//                                 switch (event.touches.length) {
+//                                     case 1:
+//                                         _0x1fbcx65.set(event.changedTouches[0].pageX, event.changedTouches[0].pageY);
+//                                         break;;
+//                                     case 2:
+//                                         if (scope.enabledZoom === false) {
+//                                             return
+//                                         };
+//                                         var dx = event.touches[0].pageX - event.touches[1].pageX;
+//                                         var dy = event.touches[0].pageY - event.touches[1].pageY;
+//                                         var distance = Math.sqrt(dx * dx + dy * dy);
+//                                         dollyEnd.set(0, distance);
+//                                         dollyDelta.subVectors(dollyEnd, dollyStart);
+//                                         if (dollyDelta.y > 0) {
+//                                             _0x1fbcx6b *= Math.pow(0.95, scope.zoomSpeed) * scope.zoomSteps
+//                                         } else {
+//                                             _0x1fbcx6b /= Math.pow(0.95, scope.zoomSpeed) * scope.zoomSteps
+//                                         };
+//                                         dollyStart.copy(dollyEnd);
+//                                         if (_0x1fbcx6b <= scope.maxZoom) {
+//                                             _0x1fbcx6b = scope.maxZoom
+//                                         };
+//                                         if (_0x1fbcx6b >= scope.minZoom) {
+//                                             _0x1fbcx6b = scope.minZoom
+//                                         };
+//                                         scope.camera.fov += (_0x1fbcx6b - scope.camera.fov) * scope.zoomSpeed;
+//                                         scope.camera.updateProjectionMatrix();
+//                                         break;;
+//                                 }
+//                             } else {
+//                                 _0x1fbcx65.set(event.clientX, event.clientY)
+//                             };
+//                             event.stopPropagation();
+//                         }
+
+//                         function onMouseUp(event) {
+//                             event.preventDefault();
+//                             _0x1fbcx63 = false;
+//                             event.stopPropagation();
+//                         }
+
+//                         function onMouseWheel(event) {
+//                             if (scope.enabledZoom === false) {
+//                                 return
+//                             };
+//                             event.preventDefault();
+//                             event.stopPropagation();
+//                             event = event ? event : window.event;
+//                             _0x1fbcx6b = scope.camera.fov - (event.detail ? event.detail * -scope.zoomSteps : event.wheelDelta / scope.zoomSteps);
+//                             if (_0x1fbcx6b <= scope.maxZoom) {
+//                                 _0x1fbcx6b = scope.maxZoom
+//                             };
+//                             if (_0x1fbcx6b >= scope.minZoom) {
+//                                 _0x1fbcx6b = scope.minZoom
+//                             };
+//                             scope.camera.fov += (_0x1fbcx6b - scope.camera.fov) * scope.zoomSpeed;
+//                             scope.camera.updateProjectionMatrix();
+//                         }
+//                         this.enabledAll = function(value) {
+//                             if (value) {
+//                                 this.domElement.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown, false);
+//                                 this.domElement.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove, false);
+//                                 this.domElement.addEventListener(MouseEvent.MOUSE_UP, onMouseUp, false);
+//                                 this.domElement.addEventListener(TouchEvent.TOUCH_START, onMouseDown, false);
+//                                 this.domElement.addEventListener(TouchEvent.TOUCH_MOVE, onMouseMove, false);
+//                                 this.domElement.addEventListener(TouchEvent.TOUCH_END, onMouseUp, false);
+//                                 this.domElement.addEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel, false);
+//                                 this.domElement.addEventListener(MouseEvent.DOM_MOUSE_SCROLL, onMouseWheel, false);
+//                             } else {
+//                                 this.domElement.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown, false);
+//                                 this.domElement.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove, false);
+//                                 this.domElement.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp, false);
+//                                 this.domElement.removeEventListener(TouchEvent.TOUCH_START, onMouseDown, false);
+//                                 this.domElement.removeEventListener(TouchEvent.TOUCH_MOVE, onMouseMove, false);
+//                                 this.domElement.removeEventListener(TouchEvent.TOUCH_END, onMouseUp, false);
+//                                 this.domElement.removeEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel, false);
+//                                 this.domElement.removeEventListener(MouseEvent.DOM_MOUSE_SCROLL, onMouseWheel, false);
+//                             }
+//                         };
+//                         this.domElement.addEventListener(Event.CONTEXT_MENU, function(event) {
+//                             event.preventDefault();
+//                             return false;
+//                         }, false);
+//                         this.update();
+//                         this.enabledAll(false);
+// };
+
+
+//blobbuilder.js
+
+///three.scenloader  main website starts from here
+
+var anisotropy = 8;
+var color = "#ffffff";
+var floorColors = ["#888888", "#675139", "#888888", "#888888", "#888888", "#d0bd9f", "#d3b591", "#4f2914", "#000000", "#dcccbd", "#315b0e", "#e0d4c4", "#cbb190", "#f3b76f"];
+var floorReflectivities = [0.02, 0.05, 0.1, 0.1, 0.05, 0.0, 0.03, 0.05, 0.0, 0.1, 0.06, 0.03, 0.05, 0.03];
+var floorBathColors = ["#888888", "#aaaaaa", "#e6d4c0", "#eed1b3", "#555555", "#afafaf", "#555555", "#e7caaa", "#e8e4cb", "#959a94", "#4e504d", "#212121", "#d4d0c5", "#b5aba1", "#bd875b", "#afafaf", "#250000", "#7b0002"];
+var floorBathReflectivities = [0.02, 0.01, 0.04, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.07, 0.1, 0.3, 0.2, 0.2, 0.07, 0.0, 0.0, 0.0];
+P360D.FurnitureMaterial = function(diffuse, bumpmapImage) {
+    THREE.MeshPhongMaterial.call(this);
+    var scope = this;
+    scope.color.setStyle(color);
+    scope.lightMap = null;
+    scope.map = diffuse || null;
+    scope.bumpMap = bumpmapImage || null;
+    scope.bumpScale = 0.2;
+    scope.specular.setStyle("#000000");
+};
+P360D.FurnitureMaterial.prototype = Object.create(THREE.MeshPhongMaterial.prototype);
+P360D.WallMaterial = function(diffuse, bumpmapImage) {
+    THREE.MeshPhongMaterial.call(this);
+    var scope = this;
+    scope.color.setStyle(color);
+    scope.lightMap = null;
+    scope.map = diffuse || null;
+    scope.bumpMap = bumpmapImage || null;
+    scope.bumpScale = 2.0;
+};
+P360D.WallMaterial.prototype = Object.create(THREE.MeshPhongMaterial.prototype);
+P360D.FloorMaterial = function(diffuse, bumpmapImage) {
+    THREE.MeshPhongMaterial.call(this);
+    var scope = this;
+    scope.color.setStyle(color);
+    scope.lightMap = null;
+    scope.map = diffuse || null;
+};
+P360D.FloorMaterial.prototype = Object.create(THREE.MeshPhongMaterial.prototype);
+P360D.ClosetMaterial = function(diffuse, skybox) {
+    THREE.MeshBasicMaterial.call(this);
+    var scope = this;
+    scope.color.setStyle(color);
+    scope.lightMap = null;
+    scope.map = diffuse || null;
+    scope.reflectivity = 0.0;
+    scope.combine = THREE.MultiplyOperation;
+    scope.envMap = skybox;
+};
+P360D.ClosetMaterial.prototype = Object.create(THREE.MeshBasicMaterial.prototype);
+P360D.CurtainsMaterial = function(diffuse) {
+    THREE.MeshBasicMaterial.call(this);
+    var scope = this;
+    scope.color.setStyle(color);
+    scope.lightMap = null;
+    scope.map = diffuse || null;
+    scope.transparent = true;
+    scope.opacity = 0.9;
+};
+P360D.CurtainsMaterial.prototype = Object.create(THREE.MeshBasicMaterial.prototype);
+P360D.TilesMaterial = function(diffuse) {
+    THREE.MeshPhongMaterial.call(this);
+    var scope = this;
+    scope.map = diffuse || null;
+    scope.color.setStyle(color);
+    scope.lightMap = null;
+};
+P360D.TilesMaterial.prototype = Object.create(THREE.MeshPhongMaterial.prototype);
+P360D.ChromeMaterial = function(skybox) {
+    THREE.MeshBasicMaterial.call(this);
+    var scope = this;
+    scope.color.setStyle("#ffffff");
+    scope.reflectivity = 0.7;
+    scope.combine = THREE.MultiplyOperation;
+    scope.envMap = skybox;
+};
+P360D.ChromeMaterial.prototype = Object.create(THREE.MeshBasicMaterial.prototype);
+P360D.MetalMaterial = function(skybox) {
+    THREE.MeshLambertMaterial.call(this);
+    var scope = this;
+    scope.color.setStyle("#9a9a9a");
+    scope.reflectivity = 0.3;
+    scope.combine = THREE.MixOperation;
+    scope.envMap = skybox;
+};
+P360D.MetalMaterial.prototype = Object.create(THREE.MeshLambertMaterial.prototype);
+P360D.DecoMaterial = function(diffuse) {
+    THREE.MeshBasicMaterial.call(this);
+    var scope = this;
+    scope.color.setStyle(color);
+    scope.map = diffuse || null;
+};
+P360D.DecoMaterial.prototype = Object.create(THREE.MeshBasicMaterial.prototype);
+P360D.CeilingMaterial = function() {
+    THREE.MeshBasicMaterial.call(this);
+    var scope = this;
+    scope.color.setStyle(color);
+    scope.lightMap = null;
+};
+P360D.CeilingMaterial.prototype = Object.create(THREE.MeshBasicMaterial.prototype);
+P360D.CeramicsMaterial = function(diffuse, skybox) {
+    THREE.MeshPhongMaterial.call(this);
+    var scope = this;
+    scope.map = diffuse || null;
+    scope.envMap = skybox;
+    scope.reflectivity = 0.04;
+    scope.lightMap = null;
+};
+P360D.CeramicsMaterial.prototype = Object.create(THREE.MeshPhongMaterial.prototype);
+P360D.GlassMaterial = function(skybox) {
+    THREE.MeshBasicMaterial.call(this);
+    var scope = this;
+    scope.color.setStyle("#99CCFF");
+    scope.transparent = true;
+    scope.depthWrite = false;
+    scope.opacity = 0.2;
+    scope.reflectivity = 0.3;
+    scope.envMap = skybox || null;
+};
+P360D.GlassMaterial.prototype = Object.create(THREE.MeshBasicMaterial.prototype);
+P360D.Livingroom = function(clothButtonImages, wallsButtonImages, woodsButtonImages, miscButtonImages, bumptexturesimages, skybox, groundMirror, isMobile, callback) {
+    THREE.Object3D.call(this);
+    var scope = this;
+    var loader = new THREE.SceneLoader();
+    var pxLoader = new PxLoader();
+    scope.isLoaded = false;
+    if (!isMobile && groundMirror !== undefined) {
+        scope.groundMirror = groundMirror
+    };
+    scope.furnitureTextures = clothButtonImages;
+    scope.wallTextures = wallsButtonImages;
+    scope.bumpTextures = bumptexturesimages;
+    scope.floorTextures = [woodsButtonImages[0], woodsButtonImages[1], woodsButtonImages[2], woodsButtonImages[3], woodsButtonImages[4], woodsButtonImages[5], woodsButtonImages[6], woodsButtonImages[7], woodsButtonImages[8], woodsButtonImages[9], woodsButtonImages[10], woodsButtonImages[26], woodsButtonImages[27], woodsButtonImages[28]];
+    scope.closetTextures = [woodsButtonImages[0], woodsButtonImages[11], woodsButtonImages[12], woodsButtonImages[13], woodsButtonImages[14], woodsButtonImages[15], woodsButtonImages[16], woodsButtonImages[17], woodsButtonImages[18], woodsButtonImages[29], woodsButtonImages[30], woodsButtonImages[31]];
+    scope.curtainsTextures = miscButtonImages;
+    var alllightmaps = [],
+        _0x1fbcx1a3 = [];
+    var _0x1fbcx1a4 = new P360D.DecoMaterial();
+    var _0x1fbcx1a5 = new P360D.CeilingMaterial();
+    var _0x1fbcx1a6 = new P360D.ChromeMaterial(skybox);
+    var _0x1fbcx1a7 = new P360D.MetalMaterial(skybox);
+    var _0x1fbcx1a8 = new P360D.GlassMaterial(skybox);
+    var _0x1fbcx1a9 = new P360D.FurnitureMaterial(scope.furnitureTextures[0], scope.bumpTextures[0]);
+    var _0x1fbcx1aa = _0x1fbcx1a9.clone();
+    var _0x1fbcx1ab = _0x1fbcx1a9.clone();
+    var _0x1fbcx1ac = _0x1fbcx1a9.clone();
+    var _0x1fbcx1ad = _0x1fbcx1aa.clone();
+    var _0x1fbcx1ae = new P360D.CurtainsMaterial(scope.curtainsTextures[0]);
+    var _0x1fbcx1af = new P360D.FloorMaterial(scope.floorTextures[0]);
+    var _0x1fbcx1b0 = new P360D.ClosetMaterial(scope.closetTextures[0], skybox);
+    var _0x1fbcx1b1 = _0x1fbcx1b0.clone();
+    var _0x1fbcx1b2 = _0x1fbcx1b0.clone();
+    var _0x1fbcx1b3 = new P360D.WallMaterial(scope.wallTextures[0], scope.bumpTextures[4]);
+    var _0x1fbcx1b4 = _0x1fbcx1b3.clone();
+    var _0x1fbcx1b5 = _0x1fbcx1b3.clone();
+    var _0x1fbcx1b6 = new THREE.MeshBasicMaterial({
+        map: scope.furnitureTextures[16],
+        reflectivity: 0.4,
+        combine: THREE.MultiplyOperation,
+        envMap: skybox
+    });
+    var _0x1fbcx1b7 = new THREE.Mesh(new THREE.PlaneGeometry(273, 157), _0x1fbcx1b6);
+    _0x1fbcx1b7.position.set(26.4, 288.7, -666);
+    var _0x1fbcx1b8, _0x1fbcx1b9, _0x1fbcx1ba, _0x1fbcx1bb, _0x1fbcx1bc, _0x1fbcx1bd, _0x1fbcx1be, _0x1fbcx1bf, _0x1fbcx1c0, _0x1fbcx1c1, _0x1fbcx1c2, _0x1fbcx1c3, _0x1fbcx1c4, _0x1fbcx1c5, _0x1fbcx1c6, _0x1fbcx1c7, _0x1fbcx1c8, _0x1fbcx1c9;
+    for (var i = 0; i < 9; i++) {
+        var singlelightmap = new PxLoaderImage(path + "lightmaps/livingroom/lightmap_" + i + ".jpg");
+        alllightmaps.push(singlelightmap);
+        pxLoader.add(singlelightmap);
+    };
+    var _0x1fbcx1cb = pxLoader.addImage(path + "deco_livingroom.jpg");
+    var _0x1fbcx1cc;
+    pxLoader.addEventListener(Event.PROGRESS, function(event) {
+        var _0x1fbcx1cd = 115;
+        imageBar.style.left = "13px";
+        if (event.totalCount) {
+            _0x1fbcx1cd = Math.floor(_0x1fbcx1cd * event.completedCount / event.totalCount);
+            imageBar.style.width = _0x1fbcx1cd + "px";
+        };
+    });
+    pxLoader.addEventListener(Event.COMPLETE, function(event) {
+        alllightmaps.forEach(function(image) {
+            var _0x1fbcx1ce = new THREE.Texture(image.img);
+            _0x1fbcx1ce.anisotropy = 8;
+            _0x1fbcx1ce.needsUpdate = true;
+            _0x1fbcx1a3.push(_0x1fbcx1ce);
+            alllightmaps = null;
+        });
+        _0x1fbcx1cc = new THREE.Texture(_0x1fbcx1cb);
+        _0x1fbcx1cc.anisotropy = 8;
+        _0x1fbcx1cc.needsUpdate = true;
+        _0x1fbcx1a4.map = _0x1fbcx1cc;
+        _0x1fbcx1a5.lightMap = _0x1fbcx1a3[0];
+        _0x1fbcx1a9.lightMap = _0x1fbcx1a3[1];
+        _0x1fbcx1aa.lightMap = _0x1fbcx1a3[4];
+        _0x1fbcx1a6.lightMap = _0x1fbcx1a3[8];
+        _0x1fbcx1ae.lightMap = _0x1fbcx1a3[5];
+        _0x1fbcx1af.lightMap = _0x1fbcx1a3[6];
+        _0x1fbcx1b0.lightMap = _0x1fbcx1a3[1];
+        _0x1fbcx1b1.lightMap = _0x1fbcx1a3[2];
+        _0x1fbcx1b2.lightMap = _0x1fbcx1a3[3];
+        _0x1fbcx1b3.lightMap = _0x1fbcx1a3[5];
+        _0x1fbcx1b4.lightMap = _0x1fbcx1a3[5];
+        _0x1fbcx1b5.lightMap = _0x1fbcx1a3[7];
+        _0x1fbcx1ab.lightMap = _0x1fbcx1a3[1];
+        _0x1fbcx1ac.lightMap = _0x1fbcx1a3[1];
+        _0x1fbcx1ad.lightMap = _0x1fbcx1a3[4];
+        loader.callbackProgress = function(progress, result) {
+           // console.clear();
+            var _0x1fbcx1cf = 158;
+            var _0x1fbcx181 = progress.totalModels + progress.totalTextures;
+            var _0x1fbcx35 = progress.loadedModels + progress.loadedTextures;
+            if (_0x1fbcx181) {
+                _0x1fbcx1cf = Math.floor(_0x1fbcx1cf * _0x1fbcx35 / _0x1fbcx181)
+            };
+            modelsBar.style.left = "66px";
+            modelsBar.style.width = _0x1fbcx1cf + "px";
+        };
+        loader.load("models/livingroom.js", _0x1fbcx1d0);
+
+        function _0x1fbcx1d0(data) {
+            data.scene.traverse(function(mesh) {
+                if (mesh instanceof THREE.Mesh) {
+                    switch (mesh.name) {
+                        case "ceiling":
+                            _0x1fbcx1b8 = mesh;
+                            _0x1fbcx1b8.material = _0x1fbcx1a5;
+                            var _0x1fbcx1d1 = _0x1fbcx1b8.geometry.faceVertexUvs[0];
+                            _0x1fbcx1b8.geometry.faceVertexUvs.push(_0x1fbcx1d1);
+                            break;;
+                        case "chair":
+                            _0x1fbcx1b9 = mesh;
+                            _0x1fbcx1b9.material = _0x1fbcx1a9;
+                            var _0x1fbcx1d2 = _0x1fbcx1b9.geometry.faceVertexUvs[0];
+                            _0x1fbcx1b9.geometry.faceVertexUvs.push(_0x1fbcx1d2);
+                            break;;
+                        case "chrome":
+                            _0x1fbcx1ba = mesh;
+                            _0x1fbcx1ba.material = _0x1fbcx1a6;
+                            var _0x1fbcx1d3 = _0x1fbcx1ba.geometry.faceVertexUvs[0];
+                            _0x1fbcx1ba.geometry.faceVertexUvs.push(_0x1fbcx1d3);
+                            break;;
+                        case "closet_1":
+                            _0x1fbcx1bb = mesh;
+                            _0x1fbcx1bb.material = _0x1fbcx1b1;
+                            var _0x1fbcx1d4 = _0x1fbcx1bb.geometry.faceVertexUvs[0];
+                            _0x1fbcx1bb.geometry.faceVertexUvs.push(_0x1fbcx1d4);
+                            break;;
+                        case "closet_2":
+                            _0x1fbcx1bc = mesh;
+                            _0x1fbcx1bc.material = _0x1fbcx1b2;
+                            var _0x1fbcx1d5 = _0x1fbcx1bc.geometry.faceVertexUvs[0];
+                            _0x1fbcx1bc.geometry.faceVertexUvs.push(_0x1fbcx1d5);
+                            break;;
+                        case "couch":
+                            _0x1fbcx1bd = mesh;
+                            _0x1fbcx1bd.material = _0x1fbcx1aa;
+                            var _0x1fbcx1d6 = _0x1fbcx1bd.geometry.faceVertexUvs[0];
+                            _0x1fbcx1bd.geometry.faceVertexUvs.push(_0x1fbcx1d6);
+                            break;;
+                        case "curtains":
+                            _0x1fbcx1be = mesh;
+                            _0x1fbcx1be.material = _0x1fbcx1ae;
+                            var _0x1fbcx1d7 = _0x1fbcx1be.geometry.faceVertexUvs[0];
+                            _0x1fbcx1be.geometry.faceVertexUvs.push(_0x1fbcx1d7);
+                            break;;
+                        case "glass":
+                            _0x1fbcx1bf = mesh;
+                            _0x1fbcx1bf.material = _0x1fbcx1a8;
+                            break;;
+                        case "ground_plane":
+                            _0x1fbcx1c0 = mesh;
+                            _0x1fbcx1c0.material = _0x1fbcx1af;
+                            var _0x1fbcx1d8 = _0x1fbcx1c0.geometry.faceVertexUvs[0];
+                            _0x1fbcx1c0.geometry.faceVertexUvs.push(_0x1fbcx1d8);
+                            break;;
+                        case "metal":
+                            _0x1fbcx1c1 = mesh;
+                            _0x1fbcx1c1.material = _0x1fbcx1a7;
+                            break;;
+                        case "art":
+                            _0x1fbcx1c4 = mesh;
+                            _0x1fbcx1c4.material = _0x1fbcx1a4;
+                            break;;
+                        case "ottoman_1":
+                            _0x1fbcx1c2 = mesh;
+                            _0x1fbcx1c2.material = _0x1fbcx1ab;
+                            var _0x1fbcx1d9 = _0x1fbcx1c2.geometry.faceVertexUvs[0];
+                            _0x1fbcx1c2.geometry.faceVertexUvs.push(_0x1fbcx1d9);
+                            break;;
+                        case "ottoman_2":
+                            _0x1fbcx1c3 = mesh;
+                            _0x1fbcx1c3.material = _0x1fbcx1ac;
+                            var _0x1fbcx1da = _0x1fbcx1c3.geometry.faceVertexUvs[0];
+                            _0x1fbcx1c3.geometry.faceVertexUvs.push(_0x1fbcx1da);
+                            break;;
+                        case "pillows":
+                            _0x1fbcx1c5 = mesh;
+                            _0x1fbcx1c5.material = _0x1fbcx1ad;
+                            var _0x1fbcx1db = _0x1fbcx1c5.geometry.faceVertexUvs[0];
+                            _0x1fbcx1c5.geometry.faceVertexUvs.push(_0x1fbcx1db);
+                            break;;
+                        case "table":
+                            _0x1fbcx1c6 = mesh;
+                            _0x1fbcx1c6.material = _0x1fbcx1b0;
+                            var _0x1fbcx1dc = _0x1fbcx1c6.geometry.faceVertexUvs[0];
+                            _0x1fbcx1c6.geometry.faceVertexUvs.push(_0x1fbcx1dc);
+                            break;;
+                        case "wall_front_1":
+                            _0x1fbcx1c7 = mesh;
+                            _0x1fbcx1c7.material = _0x1fbcx1b3;
+                            var _0x1fbcx1dd = _0x1fbcx1c7.geometry.faceVertexUvs[0];
+                            _0x1fbcx1c7.geometry.faceVertexUvs.push(_0x1fbcx1dd);
+                            break;;
+                        case "wall_front_2":
+                            _0x1fbcx1c8 = mesh;
+                            _0x1fbcx1c8.material = _0x1fbcx1b4;
+                            var _0x1fbcx1de = _0x1fbcx1c8.geometry.faceVertexUvs[0];
+                            _0x1fbcx1c8.geometry.faceVertexUvs.push(_0x1fbcx1de);
+                            break;;
+                        case "wall_left":
+                            _0x1fbcx1c9 = mesh;
+                            _0x1fbcx1c9.material = _0x1fbcx1b5;
+                            var _0x1fbcx1df = _0x1fbcx1c9.geometry.faceVertexUvs[0];
+                            _0x1fbcx1c9.geometry.faceVertexUvs.push(_0x1fbcx1df);
+                            break;;
+                    }
+                }
+            });
+            scope.add(_0x1fbcx1b8);
+            scope.add(_0x1fbcx1b9);
+            scope.add(_0x1fbcx1ba);
+            scope.add(_0x1fbcx1bb);
+            scope.add(_0x1fbcx1bc);
+            scope.add(_0x1fbcx1bd);
+            scope.add(_0x1fbcx1be);
+            scope.add(_0x1fbcx1bf);
+            scope.add(_0x1fbcx1c0);
+            scope.add(_0x1fbcx1c1);
+            scope.add(_0x1fbcx1c2);
+            scope.add(_0x1fbcx1c3);
+            scope.add(_0x1fbcx1c4);
+            scope.add(_0x1fbcx1c5);
+            scope.add(_0x1fbcx1c6);
+            scope.add(_0x1fbcx1c7);
+            scope.add(_0x1fbcx1c8);
+            scope.add(_0x1fbcx1c9);
+            scope.add(_0x1fbcx1b7);
+            scope.chair = _0x1fbcx1b9;
+            scope.closet = _0x1fbcx1bb;
+            scope.bifet = _0x1fbcx1bc;
+            scope.couch = _0x1fbcx1bd;
+            scope.curtains = _0x1fbcx1be;
+            scope.floor = _0x1fbcx1c0;
+            scope.ottoman1 = _0x1fbcx1c2;
+            scope.ottoman2 = _0x1fbcx1c3;
+            scope.pillows = _0x1fbcx1c5;
+            scope.table = _0x1fbcx1c6;
+            scope.wallFront1 = _0x1fbcx1c7;
+            scope.wallFront2 = _0x1fbcx1c8;
+            scope.wallLeft = _0x1fbcx1c9;
+            scope.tvScreen = _0x1fbcx1b7;
+            if (callback && typeof(callback) === "function") {
+                callback()
+            };
+           // console.clear();
+            loader = null;
+            pxLoader = null;
+            scope.isLoaded = true;
+        }
+    });
+    pxLoader.start();
+};
+P360D.Livingroom.prototype = Object.create(THREE.Object3D.prototype);
+P360D.Livingroom.prototype.replaceChairsTextile = function(imageIndex) {
+    this.chair.material.map = this.furnitureTextures[imageIndex];
+    this.couch.material.map = this.furnitureTextures[imageIndex];
+    if (imageIndex >= 0 && imageIndex < 10) {
+        this.chair.material.bumpScale = this.couch.material.bumpScale = 0.5;
+        this.chair.material.bumpMap = this.couch.material.bumpMap = this.bumpTextures[1];
+        this.chair.material.specular.setStyle("#000000");
+        this.couch.material.specular.setStyle("#000000");
+    } else {
+        if (imageIndex > 10) {
+            this.chair.material.bumpScale = this.couch.material.bumpScale = 0.1;
+            this.chair.material.bumpMap = this.couch.material.bumpMap = this.bumpTextures[0];
+            this.chair.material.specular.setStyle("#111111");
+            this.couch.material.specular.setStyle("#111111");
+        }
+    };
+};
+P360D.Livingroom.prototype.replaceOttomansTextile = function(imageIndex) {
+    this.ottoman1.material.map = this.furnitureTextures[imageIndex];
+    this.ottoman2.material.map = this.furnitureTextures[imageIndex];
+    if (imageIndex >= 0 && imageIndex < 10) {
+        this.ottoman1.material.bumpMap = this.ottoman2.material.bumpMap = this.bumpTextures[1];
+        this.ottoman1.material.specular.setStyle("#000000");
+        this.ottoman2.material.specular.setStyle("#000000");
+    } else {
+        if (imageIndex > 10) {
+            this.ottoman1.material.bumpMap = this.ottoman2.material.bumpMap = this.bumpTextures[0];
+            this.ottoman1.material.specular.setStyle("#111111");
+            this.ottoman2.material.specular.setStyle("#111111");
+        }
+    };
+};
+P360D.Livingroom.prototype.replacePillowsTextile = function(imageIndex) {
+    this.pillows.material.map = this.furnitureTextures[imageIndex];
+    if (imageIndex >= 0 && imageIndex < 10) {
+        this.pillows.material.bumpMap = this.bumpTextures[1];
+        this.pillows.material.specular.setStyle("#000000");
+    } else {
+        if (imageIndex > 10) {
+            this.pillows.material.bumpMap = this.bumpTextures[0];
+            this.pillows.material.specular.setStyle("#111111");
+        }
+    };
+};
+P360D.Livingroom.prototype.replaceBifetMaterial = function(imageIndex) {
+    this.bifet.material.map = this.closetTextures[imageIndex];
+    this.table.material.map = this.closetTextures[imageIndex];
+};
+P360D.Livingroom.prototype.replaceClosetMaterial = function(imageIndex) {
+    this.closet.material.map = this.closetTextures[imageIndex]
+};
+P360D.Livingroom.prototype.replaceWallFront1Material = function(imageIndex) {
+    switch (imageIndex) {
+        case 0:
+            ;
+        case 3:
+            ;
+        case 8:
+            ;
+        case 9:
+            ;
+        case 10:
+            ;
+        case 11:
+            ;
+        case 12:
+            ;
+        case 13:
+            this.wallFront1.material.bumpScale = 2.0;
+            this.wallFront1.material.bumpMap = this.bumpTextures[3];
+            break;;
+        case 1:
+            ;
+        case 4:
+            ;
+        case 5:
+            ;
+        case 7:
+            this.wallFront1.material.bumpScale = 2.0;
+            this.wallFront1.material.bumpMap = this.bumpTextures[4];
+            break;;
+        case 6:
+            this.wallFront1.material.bumpScale = 4.0;
+            this.wallFront1.material.bumpMap = this.bumpTextures[2];
+            break;;
+        case 2:
+            this.wallFront1.material.bumpScale = 10.0;
+            this.wallFront1.material.bumpMap = this.bumpTextures[5];
+            break;;
+    };
+    this.wallFront1.material.map = this.wallTextures[imageIndex];
+};
+P360D.Livingroom.prototype.replaceWallFront2Material = function(imageIndex) {
+    switch (imageIndex) {
+        case 0:
+            ;
+        case 3:
+            ;
+        case 8:
+            ;
+        case 9:
+            ;
+        case 10:
+            ;
+        case 11:
+            ;
+        case 12:
+            ;
+        case 13:
+            this.wallFront2.material.bumpScale = 2.0;
+            this.wallFront2.material.bumpMap = this.bumpTextures[3];
+            break;;
+        case 1:
+            ;
+        case 4:
+            ;
+        case 5:
+            ;
+        case 7:
+            this.wallFront2.material.bumpScale = 2.0;
+            this.wallFront2.material.bumpMap = this.bumpTextures[4];
+            break;;
+        case 6:
+            this.wallFront2.material.bumpScale = 4.0;
+            this.wallFront2.material.bumpMap = this.bumpTextures[2];
+            break;;
+        case 2:
+            this.wallFront2.material.bumpScale = 10.0;
+            this.wallFront2.material.bumpMap = this.bumpTextures[5];
+            break;;
+    };
+    this.wallFront2.material.map = this.wallTextures[imageIndex];
+};
+P360D.Livingroom.prototype.replaceCurtainsTextile = function(imageIndex) {
+    this.curtains.material.map = this.curtainsTextures[imageIndex]
+};
+P360D.Livingroom.prototype.replaceWallLeftMaterial = function(imageIndex) {
+    switch (imageIndex) {
+        case 0:
+            ;
+        case 3:
+            ;
+        case 8:
+            ;
+        case 9:
+            ;
+        case 10:
+            ;
+        case 11:
+            ;
+        case 12:
+            ;
+        case 13:
+            this.wallLeft.material.bumpScale = 2.0;
+            this.wallLeft.material.bumpMap = this.bumpTextures[3];
+            break;;
+        case 1:
+            ;
+        case 4:
+            ;
+        case 5:
+            ;
+        case 7:
+            this.wallLeft.material.bumpScale = 2.0;
+            this.wallLeft.material.bumpMap = this.bumpTextures[4];
+            break;;
+        case 6:
+            this.wallLeft.material.bumpScale = 4.0;
+            this.wallLeft.material.bumpMap = this.bumpTextures[2];
+            break;;
+        case 2:
+            this.wallLeft.material.bumpScale = 10.0;
+            this.wallLeft.material.bumpMap = this.bumpTextures[5];
+            break;;
+    };
+    this.wallLeft.material.map = this.wallTextures[imageIndex];
+};
+P360D.Livingroom.prototype.replaceFloor = function(imageIndex, isMobile) {
+    if (!isMobile && this.groundMirror !== undefined) {
+        this.groundMirror.material.uniforms.mirrorColor.value.setStyle(floorColors[imageIndex]);
+        this.groundMirror.material.uniforms.opacity.value = floorReflectivities[imageIndex];
+    };
+    this.floor.material.map = this.floorTextures[imageIndex];
+};
+P360D.Livingroom.prototype.renderToTV = function(rederer, scene, camera) {
+    var image = new Image();
+    rederer.clear();
+    rederer.render(scene, camera);
+    image.src = rederer.context.canvas.toDataURL("image/png;base64");
+    var _0x1fbcx1e3 = 256;
+    var scope = this,
+        canvas = P360D.DOM.canvas("c"),
+        _0x1fbcx3b = canvas.getContext("2d"),
+        _0x1fbcx3c = new THREE.Texture();
+    _0x1fbcx3c.needsUpdate = true;
+    _0x1fbcx3c.anisotropy = 8;
+    image.addEventListener(Event.LOAD, function(event) {
+        canvas.width = _0x1fbcx3b.width = _0x1fbcx1e3;
+        canvas.height = _0x1fbcx3b.height = _0x1fbcx1e3;
+        _0x1fbcx3b.drawImage(event.currentTarget, 0, 0, _0x1fbcx1e3, _0x1fbcx1e3);
+        _0x1fbcx3c.image = canvas;
+        scope.tvScreen.material.map = _0x1fbcx3c;
+        if (scope.tvScreen.material.reflectivity != 0.0) {
+            scope.tvScreen.material.reflectivity = 0
+        };
+        canvas = _0x1fbcx3b = _0x1fbcx3c = image = null;
+    }, false);
+};
+
+
+P360D.InfoPointManager = function(url2, onMouseDown, browser) {
+    THREE.Object3D.call(this);
+    this.sprites = [];
+    this.printSprites = [];
+    this.vector = new THREE.Vector3();
+    this.scaleFactor = 1.0;
+    var scope = this;
+    switch (browser.getScreenType()) {
+        case "phone":
+            this.scaleFactor = 14.0;
+            break;;
+        case "tablet":
+            this.scaleFactor = 22.0;
+            break;;
+        case "desktop":
+            this.scaleFactor = 35.0;
+            break;;
+    };
+    this.offset = this.scaleFactor * 1.9;
+    for (var i = 0, count = url2.length; i < count; i++) {
+        var url5 = new P360D.InfoPoint(url2[i]);
+        scope.sprites.push(url5.interactiveSprite);
+        scope.printSprites.push(url5.printSprite);
+        scope.add(url5.interactiveSprite);
+        scope.add(url5.printSprite);
+    };
+
+    function url6(event) {
+        event.preventDefault();
+        document.body.style.cursor = "pointer";
+        event.stopPropagation();
+    }
+
+    function url7(event) {
+        event.preventDefault();
+        document.body.style.cursor = "default";
+        event.stopPropagation();
+    }
+    this.enabled = function(value) {
+        if (value) {
+            for (var i = 0, count = scope.sprites.length; i < count; i++) {
+                scope.sprites[i].visible = true;
+                scope.printSprites[i].visible = true;
+                scope.sprites[i].addEventListener(MouseEvent.MOUSE_OVER, url6, false);
+                scope.sprites[i].addEventListener(MouseEvent.MOUSE_OUT, url7, false);
+                scope.sprites[i].addEventListener(browser.startEvent, onMouseDown, false);
+            }
+        } else {
+            for (var i = 0, count = scope.sprites.length; i < count; i++) {
+                scope.sprites[i].visible = false;
+                scope.printSprites[i].visible = false;
+                scope.sprites[i].removeEventListener(MouseEvent.MOUSE_OVER, url6, false);
+                scope.sprites[i].removeEventListener(MouseEvent.MOUSE_OUT, url7, false);
+                scope.sprites[i].removeEventListener(browser.startEvent, onMouseDown, false);
+            }
+        }
+    };
+    this.update = function(camera) {
+        for (var i = 0, count = scope.sprites.length; i < count; i++) {
+            scope.printSprites[i].scale.x = scope.printSprites[i].scale.y = scope.vector.subVectors(scope.printSprites[i].position, camera.position).length() / scope.scaleFactor;
+            scope.sprites[i].scale.x = scope.sprites[i].scale.y = scope.vector.subVectors(scope.sprites[i].position, camera.position).length() / scope.offset;
+        }
+    };
+    this.enabled(false);
+};
+P360D.InfoPointManager.prototype = Object.create(THREE.Object3D.prototype);
+P360D.InfoPoint = function(url2) {
+    var url8 = new THREE.SpriteMaterial({
+        color: 0xff0000,
+        transparent: true,
+        depthWrite: false,
+        opacity: 0.0
+    });
+    var url9 = new THREE.SpriteMaterial({
+        map: P360D.TextureUtils.loadTexture(path + "infopoint.png"),
+        transparent: true,
+        depthWrite: false,
+        opacity: 1.0
+    });
+    var scope = this;
+    this.printSprite = new THREE.Sprite(url9);
+    this.interactiveSprite = new THREE.Sprite(url8);
+    this.printSprite.position.x = this.interactiveSprite.position.x = url2.x;
+    this.printSprite.position.y = this.interactiveSprite.position.y = url2.y;
+    this.printSprite.position.z = this.interactiveSprite.position.z = url2.z;
+};
+var topDistace = 25;
+P360D.LivingroomGUI = function(clothButtonImages, wallsButtonImages, woodsButtonImages, miscButtonImages) {
+    console.log(clothButtonImages[0])
+    var scope = this;
+    var chairImages = clothButtonImages;
+    var ottomanImages = clothButtonImages;
+    var pillowsImages = clothButtonImages;
+    var wall1Images = wallsButtonImages;
+    var wall2Images = wallsButtonImages;
+    var wall3Images = wallsButtonImages;
+    var floorImages = [woodsButtonImages[0], woodsButtonImages[1], woodsButtonImages[2], woodsButtonImages[3], woodsButtonImages[4], woodsButtonImages[5], woodsButtonImages[6], woodsButtonImages[7], woodsButtonImages[8], woodsButtonImages[9], woodsButtonImages[10], woodsButtonImages[26], woodsButtonImages[27], woodsButtonImages[28]];
+    var closetImages = [woodsButtonImages[0], woodsButtonImages[11], woodsButtonImages[12], woodsButtonImages[13], woodsButtonImages[14], woodsButtonImages[15], woodsButtonImages[16], woodsButtonImages[17], woodsButtonImages[18], woodsButtonImages[29], woodsButtonImages[30], woodsButtonImages[31]];
+    var bifetImages = [woodsButtonImages[0], woodsButtonImages[11], woodsButtonImages[12], woodsButtonImages[13], woodsButtonImages[14], woodsButtonImages[15], woodsButtonImages[16], woodsButtonImages[17], woodsButtonImages[18], woodsButtonImages[29], woodsButtonImages[30], woodsButtonImages[31]];
+    var curtainImages = miscButtonImages;
+    this.container = P360D.DOM.div("livingroom");
+    var Categories = ["CHAIR AND LOVESEAT", "OTTOMANS", "PILLOWS", "TABLE AND BIFFET", "CLOSET", "FLOOR", "CURTAINS", "FRONT LEFT WALL", "FRONT RIGHT WALL", "WINDOW WALL"];
+    var _0x1fbcx226 = ["270px", "270px", "270px", "210px", "210px", "210px", "210px", "210px", "210px", "220px"];
+    var AllcategoriesDiv = [];
+    for (var i = 0, count = Categories.length; i < count; i++) {
+        var CategoriesDiv = P360D.DOM.div("livingroom_con" + i);
+        CategoriesDiv.style.webkitTransform = "translateY(20px)";
+        CategoriesDiv.style.MozTransform = "translateY(20px)";
+        CategoriesDiv.style.msTransform = "translateY(20px)";
+        CategoriesDiv.style.OTransform = "translateY(20px)";
+        CategoriesDiv.style.transform = "translateY(20px)";
+        CategoriesDiv.style.height = _0x1fbcx226[i];
+        CategoriesDiv.innerHTML = "&nbsp;&nbsp;&nbsp;" + Categories[i];
+        this.container.appendChild(CategoriesDiv);
+        AllcategoriesDiv.push(CategoriesDiv);
+    };
+    var allchairbuttons = [],
+        allottomanbuttons = [],
+        allpillowbuttons = [],
+        allclosetbuttons = [],
+        allbifetbuttons = [],
+        allcurtainsbuttons = [],
+        allwall1buttons = [],
+        allwall2buttons = [],
+        allwall3buttons = [],
+        allfloorbuttons = [];
+    scope.chairIndex = scope.ottomansIndex = scope.pillowsIndex = scope.closetIndex = scope.bifetIndex = scope.curtainsIndex = scope.wallFront1Index = scope.wallFront2Index = scope.wallLeftIndex = scope.floorIndex = 0;
+    for (var i = 0, count = chairImages.length; i < count; i++) {
+        var singleButtonChairs = P360D.DOM.div("livingroom_chair" + i);
+        singleButtonChairs.appendChild(chairImages[i].cloneNode(true));
+        singleButtonChairs.classList.add("textureButton");
+        singleButtonChairs.style.left = 10 + (i % 5) * 55 + "px";
+        singleButtonChairs.style.top = topDistace + parseInt(i / 5) * 55 + "px";
+        allchairbuttons.push(singleButtonChairs);
+        AllcategoriesDiv[0].appendChild(singleButtonChairs);
+        allchairbuttons[i].addEventListener(browser.clickEvent, function(event) {
+            scope.chairIndex = allchairbuttons.indexOf(event.currentTarget)
+        }, false);
+    };
+    for (var i = 0, count = ottomanImages.length; i < count; i++) {
+        var singleButtonottoman = P360D.DOM.div("livingroom_ottoman" + i);
+        singleButtonottoman.appendChild(ottomanImages[i].cloneNode(true));
+        singleButtonottoman.classList.add("textureButton");
+        singleButtonottoman.style.left = 10 + (i % 5) * 55 + "px";
+        singleButtonottoman.style.top = topDistace + parseInt(i / 5) * 55 + "px";
+        allottomanbuttons.push(singleButtonottoman);
+        AllcategoriesDiv[1].appendChild(singleButtonottoman);
+        allottomanbuttons[i].addEventListener(browser.clickEvent, function(event) {
+            scope.ottomansIndex = allottomanbuttons.indexOf(event.currentTarget)
+        }, false);
+    };
+    for (var i = 0, count = pillowsImages.length; i < count; i++) {
+        var singleButtonpillow = P360D.DOM.div("livingroom_pillows" + i);
+        singleButtonpillow.appendChild(pillowsImages[i].cloneNode(true));
+        singleButtonpillow.classList.add("textureButton");
+        singleButtonpillow.style.left = 10 + (i % 5) * 55 + "px";
+        singleButtonpillow.style.top = topDistace + parseInt(i / 5) * 55 + "px";
+        allpillowbuttons.push(singleButtonpillow);
+        AllcategoriesDiv[2].appendChild(singleButtonpillow);
+        allpillowbuttons[i].addEventListener(browser.clickEvent, function(event) {
+            scope.pillowsIndex = allpillowbuttons.indexOf(event.currentTarget)
+        }, false);
+    };
+    for (var i = 0, count = closetImages.length; i < count; i++) {
+        var singleButtoncloset = P360D.DOM.div("livingroom_closet_" + i);
+        singleButtoncloset.appendChild(closetImages[i].cloneNode(true));
+        singleButtoncloset.classList.add("textureButton");
+        singleButtoncloset.style.left = 10 + (i % 5) * 55 + "px";
+        singleButtoncloset.style.top = topDistace + parseInt(i / 5) * 55 + "px";
+        allclosetbuttons.push(singleButtoncloset);
+        AllcategoriesDiv[3].appendChild(singleButtoncloset);
+        allclosetbuttons[i].addEventListener(browser.clickEvent, function(event) {
+            scope.bifetIndex = allclosetbuttons.indexOf(event.currentTarget)
+        }, false);
+    };
+    for (var i = 0, count = bifetImages.length; i < count; i++) {
+        var singleButtonbifet = P360D.DOM.div("livingroom_bifet_" + i);
+        singleButtonbifet.appendChild(bifetImages[i].cloneNode(true));
+        singleButtonbifet.classList.add("textureButton");
+        singleButtonbifet.style.left = 10 + (i % 5) * 55 + "px";
+        singleButtonbifet.style.top = topDistace + parseInt(i / 5) * 55 + "px";
+        allbifetbuttons.push(singleButtonbifet);
+        AllcategoriesDiv[4].appendChild(singleButtonbifet);
+        allbifetbuttons[i].addEventListener(browser.clickEvent, function(event) {
+            scope.closetIndex = allbifetbuttons.indexOf(event.currentTarget)
+        }, false);
+    };
+    for (var i = 0, count = floorImages.length; i < count; i++) {
+        var singleButtonfloor = P360D.DOM.div("livingroom_floor_" + i);
+        singleButtonfloor.appendChild(floorImages[i].cloneNode(true));
+        singleButtonfloor.classList.add("textureButton");
+        singleButtonfloor.style.left = 10 + (i % 5) * 55 + "px";
+        singleButtonfloor.style.top = topDistace + parseInt(i / 5) * 55 + "px";
+        allfloorbuttons.push(singleButtonfloor);
+        AllcategoriesDiv[5].appendChild(singleButtonfloor);
+        allfloorbuttons[i].addEventListener(browser.clickEvent, function(event) {
+            scope.floorIndex = allfloorbuttons.indexOf(event.currentTarget)
+        }, false);
+    };
+    for (var i = 0, count = curtainImages.length; i < count; i++) {
+        var singleButtoncurtains = P360D.DOM.div("livingroom_curtains_" + i);
+        singleButtoncurtains.appendChild(curtainImages[i].cloneNode(true));
+        singleButtoncurtains.classList.add("textureButton");
+        singleButtoncurtains.style.left = 10 + (i % 5) * 55 + "px";
+        singleButtoncurtains.style.top = topDistace + parseInt(i / 5) * 55 + "px";
+        allcurtainsbuttons.push(singleButtoncurtains);
+        AllcategoriesDiv[6].appendChild(singleButtoncurtains);
+        allcurtainsbuttons[i].addEventListener(browser.clickEvent, function(event) {
+            scope.curtainsIndex = allcurtainsbuttons.indexOf(event.currentTarget)
+        }, false);
+    };
+    for (var i = 0, count = wall1Images.length; i < count; i++) {
+        var singleButtonwall1 = P360D.DOM.div("livingroom_wall1_" + i);
+        singleButtonwall1.appendChild(wall1Images[i].cloneNode(true));
+        singleButtonwall1.classList.add("textureButton");
+        singleButtonwall1.style.left = 10 + (i % 5) * 55 + "px";
+        singleButtonwall1.style.top = topDistace + parseInt(i / 5) * 55 + "px";
+        allwall1buttons.push(singleButtonwall1);
+        AllcategoriesDiv[7].appendChild(singleButtonwall1);
+        allwall1buttons[i].addEventListener(browser.clickEvent, function(event) {
+            scope.wallFront1Index = allwall1buttons.indexOf(event.currentTarget)
+        }, false);
+    };
+    for (var i = 0, count = wall2Images.length; i < count; i++) {
+        var singleButtonwall2 = P360D.DOM.div("livingroom_wall2_" + i);
+        singleButtonwall2.appendChild(wall2Images[i].cloneNode(true));
+        singleButtonwall2.classList.add("textureButton");
+        singleButtonwall2.style.left = 10 + (i % 5) * 55 + "px";
+        singleButtonwall2.style.top = topDistace + parseInt(i / 5) * 55 + "px";
+        allwall2buttons.push(singleButtonwall2);
+        AllcategoriesDiv[8].appendChild(singleButtonwall2);
+        allwall2buttons[i].addEventListener(browser.clickEvent, function(event) {
+            scope.wallFront2Index = allwall2buttons.indexOf(event.currentTarget)
+        }, false);
+    };
+    for (var i = 0, count = wall3Images.length; i < count; i++) {
+        var singleButtonwall3 = P360D.DOM.div("livingroom_wall3_" + i);
+        singleButtonwall3.appendChild(wall3Images[i].cloneNode(true));
+        singleButtonwall3.classList.add("textureButton");
+        singleButtonwall3.style.left = 10 + (i % 5) * 55 + "px";
+        singleButtonwall3.style.top = topDistace + parseInt(i / 5) * 55 + "px";
+        allwall3buttons.push(singleButtonwall3);
+        AllcategoriesDiv[9].appendChild(singleButtonwall3);
+        allwall3buttons[i].addEventListener(browser.clickEvent, function(event) {
+            scope.wallLeftIndex = allwall3buttons.indexOf(event.currentTarget)
+        }, false);
+    };
+};
+
+console.log(Event.LOAD);
+
+window.addEventListener(Event.LOAD, init, false); //triggers init  functionon window load
+var browser;
+var path = "",
+    guiPath = "";
+var viewport, camera, cameraPano, scene, renderer;
+var livCamControls, bedCamControls, kitCamControls, bathCamControls;
+var controls = [];
+var wrapper, mainMenu;
+var toolBarTop, toolBarBottom;
+var VIEW_WIDTH = screen.availWidth;
+var VIEW_HEIGHT = window.innerHeight;
+var livingroom;
+var manager;
+var isRendering = false,
+    isHome = true,
+    isInfo = false;
+var isInfoPoints = false;
+var roomIndex = 0;
+var cameraPositions = [new THREE.Vector3(0, 0, 1000), new THREE.Vector3(0, 0, 1000), new THREE.Vector3(0, 0, 1000), new THREE.Vector3(-250, 320, 290)];
+var groundMirror;
+var infoPoints = [];
+var livingroomGUIPanel;
+var guis = [];
+var customizeButton;
+var isMenu = false;
+var isMobile;
+var progressBGInit;
+var progressBGRooms;
+var mouseBlocker;
+
+function init() {
+    browser = new IdentifyBrowser("Apartment Interior");
+    //console.log(browser.getScreenType());
+    isMobile = browser.mobile();
+    if (isMobile) {
+        path = "textures_mobile/"
+    } else {
+        path = "textures_small/"
+    };
+    if (window.devicePixelRatio > 1) {
+        guiPath = "gui/retina/"
+    } else {
+        guiPath = "gui/"
+    };
+    mouseBlocker = P360D.DOM.div("mouseBlocker");
+    document.body.appendChild(mouseBlocker);
+    progressBGInit = P360D.DOM.div("progressBGInit");
+    document.body.appendChild(progressBGInit);
+    var _0x1fbcx278 = P360D.DOM.div("mainProgress");
+    progressBGInit.appendChild(_0x1fbcx278);
+    var _0x1fbcx279 = P360D.DOM.div("barBGInit");
+    _0x1fbcx278.appendChild(_0x1fbcx279);
+    var _0x1fbcx27a = P360D.DOM.div("barInit");
+    _0x1fbcx278.appendChild(_0x1fbcx27a);
+    progressBGRooms = P360D.DOM.div("progressBGRooms");
+    progressBGRooms.style.visibility = "hidden";
+    progressBGRooms.style.opacity = "0.0";
+    var _0x1fbcx27b = P360D.DOM.div("progressRoomsLoad");
+    progressBGRooms.appendChild(_0x1fbcx27b);
+    var _0x1fbcx27c = P360D.DOM.div("barBG");
+    _0x1fbcx27b.appendChild(_0x1fbcx27c);
+    var _0x1fbcx27d = P360D.DOM.div("imageBar");
+    _0x1fbcx27b.appendChild(_0x1fbcx27d);
+    var _0x1fbcx27e = P360D.DOM.div("modelsBar");
+    _0x1fbcx27b.appendChild(_0x1fbcx27e);
+    var _0x1fbcx27f = new Image();
+    _0x1fbcx27f.src = guiPath + "logoLoader.png";
+    _0x1fbcx27f.addEventListener(Event.LOAD, geometry0, false);
+
+    function geometry0(event) {
+        _0x1fbcx278.appendChild(event.currentTarget);
+        _0x1fbcx27b.appendChild(event.currentTarget.cloneNode(true));
+        TweenMax.to(_0x1fbcx278, 0.5, {
+            opacity: 1.0,
+            onComplete: function() {
+                pxloader.start()
+            }
+        });
+    }
+
+    // all images defined here and where to render
+   
+    var totalImages = [path + "cloth/cloth_0.jpg", path + "cloth/cloth_1.jpg", path + "cloth/cloth_2.jpg", path + "cloth/cloth_3.jpg", path + "cloth/cloth_4.jpg", path + "cloth/cloth_5.jpg", path + "cloth/cloth_6.jpg", path + "cloth/cloth_7.jpg", path + "cloth/cloth_8.jpg", path + "cloth/cloth_9.jpg", path + "cloth/cloth_10.jpg", path + "cloth/cloth_11.jpg", path + "cloth/cloth_12.jpg", path + "cloth/cloth_13.jpg", path + "cloth/cloth_14.jpg", path + "cloth/cloth_15.jpg", path + "cloth/cloth_16.jpg", path + "cloth/cloth_17.jpg", path + "misc/misc_0.jpg", path + "misc/misc_1.jpg", path + "misc/misc_2.jpg", path + "misc/misc_3.jpg", path + "misc/misc_4.jpg", path + "misc/misc_5.jpg", path + "misc/misc_6.jpg", path + "misc/misc_7.jpg", path + "misc/misc_8.jpg", path + "misc/misc_9.jpg", path + "misc/misc_10.jpg", path + "misc/misc_11.jpg", path + "tiles/tiles_0.jpg", path + "tiles/tiles_1.jpg", path + "tiles/tiles_2.jpg", path + "tiles/tiles_3.jpg", path + "tiles/tiles_4.jpg", path + "tiles/tiles_5.jpg", path + "tiles/tiles_6.jpg", path + "tiles/tiles_7.jpg", path + "tiles/tiles_8.jpg", path + "tiles/tiles_9.jpg", path + "tiles/tiles_10.jpg", path + "tiles/tiles_11.jpg", path + "tiles/tiles_12.jpg", path + "tiles/tiles_13.jpg", path + "tiles/tiles_14.jpg", path + "tiles/tiles_15.jpg", path + "tiles/tiles_16.jpg", path + "tiles/tiles_17.jpg", path + "tiles/tiles_18.jpg", path + "tiles/tiles_19.jpg", path + "wall/wall_diffuse_0.jpg", path + "wall/wall_diffuse_1.jpg", path + "wall/wall_diffuse_2.jpg", path + "wall/wall_diffuse_3.jpg", path + "wall/wall_diffuse_4.jpg", path + "wall/wall_diffuse_5.jpg", path + "wall/wall_diffuse_6.jpg", path + "wall/wall_diffuse_7.jpg", path + "wall/wall_diffuse_8.jpg", path + "wall/wall_diffuse_9.jpg", path + "wall/wall_diffuse_10.jpg", path + "wall/wall_diffuse_11.jpg", path + "wall/wall_diffuse_12.jpg", path + "wall/wall_diffuse_13.jpg", path + "wood/wood_diffuse_0.jpg", path + "wood/wood_diffuse_1.jpg", path + "wood/wood_diffuse_2.jpg", path + "wood/wood_diffuse_3.jpg", path + "wood/wood_diffuse_4.jpg", path + "wood/wood_diffuse_5.jpg", path + "wood/wood_diffuse_6.jpg", path + "wood/wood_diffuse_7.jpg", path + "wood/wood_diffuse_8.jpg", path + "wood/wood_diffuse_9.jpg", path + "wood/wood_diffuse_10.jpg", path + "wood/wood_diffuse_11.jpg", path + "wood/wood_diffuse_12.jpg", path + "wood/wood_diffuse_13.jpg", path + "wood/wood_diffuse_14.jpg", path + "wood/wood_diffuse_15.jpg", path + "wood/wood_diffuse_16.jpg", path + "wood/wood_diffuse_17.jpg", path + "wood/wood_diffuse_18.jpg", path + "wood/wood_diffuse_19.jpg", path + "wood/wood_diffuse_20.jpg", path + "wood/wood_diffuse_21.jpg", path + "wood/wood_diffuse_22.jpg", path + "wood/wood_diffuse_23.jpg", path + "wood/wood_diffuse_24.jpg", path + "wood/wood_diffuse_25.jpg", path + "wood/wood_diffuse_26.jpg", path + "wood/wood_diffuse_27.jpg", path + "wood/wood_diffuse_28.jpg", path + "wood/wood_diffuse_29.jpg", path + "wood/wood_diffuse_30.jpg", path + "wood/wood_diffuse_31.jpg", guiPath + "cloth/cloth_0.png", guiPath + "cloth/cloth_1.png", guiPath + "cloth/cloth_2.png", guiPath + "cloth/cloth_3.png", guiPath + "cloth/cloth_4.png", guiPath + "cloth/cloth_5.png", guiPath + "cloth/cloth_6.png", guiPath + "cloth/cloth_7.png", guiPath + "cloth/cloth_8.png", guiPath + "cloth/cloth_9.png", guiPath + "cloth/cloth_10.png", guiPath + "cloth/cloth_11.png", guiPath + "cloth/cloth_12.png", guiPath + "cloth/cloth_13.png", guiPath + "cloth/cloth_14.png", guiPath + "cloth/cloth_15.png", guiPath + "cloth/cloth_16.png", guiPath + "cloth/cloth_17.png", guiPath + "misc/misc_0.png", guiPath + "misc/misc_1.png", guiPath + "misc/misc_2.png", guiPath + "misc/misc_3.png", guiPath + "misc/misc_4.png", guiPath + "misc/misc_5.png", guiPath + "misc/misc_6.png", guiPath + "misc/misc_7.png", guiPath + "misc/misc_8.png", guiPath + "misc/misc_9.png", guiPath + "misc/misc_10.png", guiPath + "misc/misc_11.png", guiPath + "tiles/tiles_0.png", guiPath + "tiles/tiles_1.png", guiPath + "tiles/tiles_2.png", guiPath + "tiles/tiles_3.png", guiPath + "tiles/tiles_4.png", guiPath + "tiles/tiles_5.png", guiPath + "tiles/tiles_6.png", guiPath + "tiles/tiles_7.png", guiPath + "tiles/tiles_8.png", guiPath + "tiles/tiles_9.png", guiPath + "tiles/tiles_10.png", guiPath + "tiles/tiles_11.png", guiPath + "tiles/tiles_12.png", guiPath + "tiles/tiles_13.png", guiPath + "tiles/tiles_14.png", guiPath + "tiles/tiles_15.png", guiPath + "tiles/tiles_16.png", guiPath + "tiles/tiles_17.png", guiPath + "tiles/tiles_18.png", guiPath + "tiles/tiles_19.png", guiPath + "wall/wall_0.png", guiPath + "wall/wall_1.png", guiPath + "wall/wall_2.png", guiPath + "wall/wall_3.png", guiPath + "wall/wall_4.png", guiPath + "wall/wall_5.png", guiPath + "wall/wall_6.png", guiPath + "wall/wall_7.png", guiPath + "wall/wall_8.png", guiPath + "wall/wall_9.png", guiPath + "wall/wall_10.png", guiPath + "wall/wall_11.png", guiPath + "wall/wall_12.png", guiPath + "wall/wall_13.png", guiPath + "wood/wood_0.png", guiPath + "wood/wood_1.png", guiPath + "wood/wood_2.png", guiPath + "wood/wood_3.png", guiPath + "wood/wood_4.png", guiPath + "wood/wood_5.png", guiPath + "wood/wood_6.png", guiPath + "wood/wood_7.png", guiPath + "wood/wood_8.png", guiPath + "wood/wood_9.png", guiPath + "wood/wood_10.png", guiPath + "wood/wood_11.png", guiPath + "wood/wood_12.png", guiPath + "wood/wood_13.png", guiPath + "wood/wood_14.png", guiPath + "wood/wood_15.png", guiPath + "wood/wood_16.png", guiPath + "wood/wood_17.png", guiPath + "wood/wood_18.png", guiPath + "wood/wood_19.png", guiPath + "wood/wood_20.png", guiPath + "wood/wood_21.png", guiPath + "wood/wood_22.png", guiPath + "wood/wood_23.png", guiPath + "wood/wood_24.png", guiPath + "wood/wood_25.png", guiPath + "wood/wood_26.png", guiPath + "wood/wood_27.png", guiPath + "wood/wood_28.png", guiPath + "wood/wood_29.png", guiPath + "wood/wood_30.png", guiPath + "wood/wood_31.png", path + "bumpmaps/bump_0.jpg", path + "bumpmaps/bump_1.jpg", path + "bumpmaps/bump_2.jpg", path + "bumpmaps/bump_3.jpg", path + "bumpmaps/bump_4.jpg", path + "bumpmaps/bump_5.jpg", path + "bumpmaps/bump_6.jpg", path + "bumpmaps/bump_7.jpg", path + "bumpmaps/bump_8.jpg", path + "bumpmaps/bump_9.jpg", path + "bumpmaps/bump_10.jpg", path + "bumpmaps/bump_11.jpg", path + "skybox1/sky_0.jpg", path + "skybox1/sky_1.jpg", path + "skybox1/sky_2.jpg", path + "skybox1/sky_3.jpg", path + "skybox1/sky_4.jpg", path + "skybox1/sky_5.jpg", guiPath + "fullscreen.png", guiPath + "plus360.png", guiPath + "facebook.png", guiPath + "twitter.png", guiPath + "google.png", guiPath + "infopointgui.png", guiPath + "mainButtonCover.png", guiPath + "livingroom.png", guiPath + "bedroom.png", guiPath + "kitchen.png", guiPath + "bathroom.png", guiPath + "title.png"];
+     var testimages = {
+                        'cloths':[ {'path':"textures_small/cloth/cloth_0.jpg"},{'path':"textures_small/cloth/cloth_1.jpg"},{'path':"textures_small/cloth/cloth_2.jpg"},{'path':"textures_small/cloth/cloth_3.jpg"},{'path':"textures_small/cloth/cloth_4.jpg"},{'path':"textures_small/cloth/cloth_5.jpg"},{'path':"textures_small/cloth/cloth_6.jpg"},{'path':"textures_small/cloth/cloth_7.jpg"},{'path':"textures_small/cloth/cloth_8.jpg"},{'path':"textures_small/cloth/cloth_9.jpg"},{'path':"textures_small/cloth/cloth_10.jpg"},{'path':"textures_small/cloth/cloth_11.jpg"},{'path':"textures_small/cloth/cloth_12.jpg"},{'path':"textures_small/cloth/cloth_13.jpg"},{'path':"textures_small/cloth/cloth_14.jpg"},{'path':"textures_small/cloth/cloth_15.jpg"},{'path':"textures_small/cloth/cloth_16.jpg"},{'path':"textures_small/cloth/cloth_17.jpg"}],
+                        'miscs':[{'path':"textures_small/misc/misc_0.jpg"}, {'path':"textures_small/misc/misc_1.jpg"}],
+                        'tiles':[{'path':"textures_small/tiles/tiles_0.jpg"}, {'path':"textures_small/tiles/tiles_1.jpg"},{'path':"textures_small/tiles/tiles_2.jpg"}],
+                         'walls':[{'path':"textures_small/wall/wall_diffuse_0.jpg"}, {'path':"textures_small/wall/wall_diffuse_1.jpg"}],
+                         'woods':[{'path':"textures_small/wood/wood_diffuse_0.jpg"},{'path':"textures_small/wood/wood_diffuse_1.jpg"}],
+                          'clothButtons':[{'path':"gui/retina/cloth/cloth_0.png"},{'path':"gui/retina/cloth/cloth_1.png"},{'path':"gui/retina/cloth/cloth_2.png"},{'path':"gui/retina/cloth/cloth_3.png"}],
+                          'miscButtons':[{'name': 'test'}],
+                           'tilesButtons':[{'name': 'test'}],
+                           'wallsButtons':[{'name':'test'}],
+                           'woodsButtons':[{'name':'test'}],
+                           'bumpimages':[{'name':'test'}],
+                       'skyboximages':[{'name':'test'}],
+                       'extraImages':[{'name':'test'}]};
+    
+    viewport = P360D.DOM.div("viewport");
+    viewport.style.visibility = "hidden";
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(45, VIEW_WIDTH / VIEW_HEIGHT, 1, 20000);
+    cameraPano = new THREE.PerspectiveCamera(45, VIEW_WIDTH / VIEW_HEIGHT, 1, 12000);
+    cameraPano.position.set(-250, 320, 290);
+    cameraPano.updateProjectionMatrix();
+    renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true
+    });
+    renderer.setSize(VIEW_WIDTH, VIEW_HEIGHT);
+    renderer.setClearColor(0xffffff, 1);
+    viewport.appendChild(renderer.domElement);
+    var geometry2 = new THREE.PerspectiveCamera(45, 225 / 300, 1, 12000);
+    var light = new THREE.HemisphereLight(0xffffff, 0xffffff, 1);
+    scene.add(light);
+    manager = new P360D.InteractiveScene(camera, viewport);
+    wrapper = P360D.DOM.div("wrapper");
+    document.body.appendChild(wrapper);
+    mainMenu = P360D.DOM.div("mainMenu");
+    wrapper.appendChild(mainMenu);
+    wrapper.appendChild(viewport);
+    wrapper.appendChild(progressBGRooms);
+    browser.disabledTouch(wrapper);
+    toolBarTop = P360D.DOM.div("toolBarTop");
+    wrapper.appendChild(toolBarTop);
+    var transitionSprite = P360D.DOM.div("transitionSprite");
+    transitionSprite.style.visibility = "hidden";
+    wrapper.appendChild(transitionSprite);
+    var TopButtons = [];
+    toolBarBottom = P360D.DOM.div("toolBarBottom");
+    toolBarBottom.style.webkitTransform = "translate( 5px, " + (VIEW_HEIGHT - 45) + "px)";
+    toolBarBottom.style.MozTransform = "translate( 5px, " + (VIEW_HEIGHT - 45) + "px)";
+    toolBarBottom.style.msTransform = "translate( 5px, " + (VIEW_HEIGHT - 45) + "px)";
+    toolBarBottom.style.OTransform = "translate( 5px, " + (VIEW_HEIGHT - 45) + "px)";
+    toolBarBottom.style.transform = "translate( 5px, " + (VIEW_HEIGHT - 45) + "px)";
+    wrapper.appendChild(toolBarBottom);
+    var bottomButtons = [];
+    for (var i = 0; i < 2; i++) {
+        var newbottomButton = P360D.DOM.div("bottomButton" + i);
+        newbottomButton.classList.add("button");
+        toolBarBottom.appendChild(newbottomButton);
+        bottomButtons.push(newbottomButton);
+        switch (i) {
+            case 0:
+                newbottomButton.style.width = "100px";
+                newbottomButton.textContent = "GO BACK";
+                break;;
+            case 1:
+                newbottomButton.style.left = "105px";
+                break;;
+        };
+        bottomButtons[i].addEventListener(browser.clickEvent, function(event) {
+            switch (bottomButtons.indexOf(event.currentTarget)) {
+                case 0:
+                    gobacktohome();
+                    break;;
+                case 1:
+                    isInfoPoints = !isInfoPoints;
+                    toggleInfopoints();
+                    break;;
+            }
+        }, false);
+    };
+    customizeButton = P360D.DOM.div("customizeButton");
+    customizeButton.innerHTML = "CUSTOMIZE <";
+    customizeButton.style.opacity = "0.0";
+    customizeButton.style.visibility = "hidden";
+    wrapper.appendChild(customizeButton);
+    customizeButton.addEventListener(browser.clickEvent, function(event) {
+        isMenu = !isMenu;
+        if (isMenu) {
+            customizeButton.textContent = "CUSTOMIZE >";
+            TweenMax.to(event.currentTarget, 0.6, {
+                right: "310px",
+                ease: Expo.easeOut
+            });
+            TweenMax.to(guis[roomIndex].container, 0.6, {
+                right: "0px",
+                ease: Expo.easeOut
+            });
+        } else {
+            customizeButton.textContent = "CUSTOMIZE <";
+            TweenMax.to(event.currentTarget, 0.6, {
+                right: "0px",
+                ease: Expo.easeOut
+            });
+            TweenMax.to(guis[roomIndex].container, 0.6, {
+                right: "-310px",
+                ease: Expo.easeOut
+            });
+        };
+    }, false);
+    var allbumptextures = [];
+    var allclothTextures = [],
+        allwallsTextures = [],
+        allwoodsTextures = [],
+        allmiscTextures = [],
+        alltilesTextures = [];
+    var clothButtonImages = [],
+        wallsButtonImages = [],
+        woodsButtonImages = [],
+        miscButtonImages = [],
+        tilesButtonImages = [];
+    var extraImages = [];
+    var LoadedImages = [];
+     var clothLoadedImages = [];
+      var miscLoadedImages = [];
+      var tileLoadedImages = [];
+      var wallLoadedImages = [];
+      var woodLoadedImages = [];
+      var clothbuttonLoadedImages = [];
+      var miscbuttonLoadedImages = [];
+      var tilebuttonLoadedImages = [];
+      var wallbuttonLoadedImages = [];
+      var woodbuttonLoadedImages = [];
+
+     
+    var material4 = [],
+        material5 = [],
+        material6 = [];
+    var skybox = new THREE.CubeTexture([]);
+    var pxloader = new PxLoader();
+    for (var i = 0, count = totalImages.length; i < count; i++) {
+        if(i>17){
+        var image = pxloader.addImage(totalImages[i]);
+        LoadedImages.push(image);}else{
+            var image = 'test'+i;
+        LoadedImages.push(image);
+
+        }
+    };
+    for (var i = 0, count = testimages.cloths.length; i < count; i++) {
+       
+        var image = pxloader.addImage(testimages.cloths[i].path);
+        clothLoadedImages.push(image);
+    };
+    for (var i = 0, count = testimages.miscs.length; i < count; i++) {
+       
+        var image = pxloader.addImage(testimages.miscs[i].path);
+        miscLoadedImages.push(image);
+    };
+     for (var i = 0, count = testimages.tiles.length; i < count; i++) {
+       
+        var image = pxloader.addImage(testimages.tiles[i].path);
+        tileLoadedImages.push(image);
+    };
+     for (var i = 0, count = testimages.walls.length; i < count; i++) {
+       
+        var image = pxloader.addImage(testimages.walls[i].path);
+        woodLoadedImages.push(image);
+    };
+     for (var i = 0, count = testimages.woods.length; i < count; i++) {
+       
+        var image = pxloader.addImage(testimages.woods[i].path);
+        wallLoadedImages.push(image);
+    };
+     for (var i = 0, count = testimages.clothButtons.length; i < count; i++) {
+       
+        var image = pxloader.addImage(testimages.clothButtons[i].path);
+        clothbuttonLoadedImages.push(image);
+    };
+   
+    var material9 = [new THREE.Vector3(-275, 83, 210), new THREE.Vector3(-11, 70, -66), new THREE.Vector3(360, 148, 250), new THREE.Vector3(270, 110, -540), new THREE.Vector3(700, 340, -120), new THREE.Vector3(-460, 350, -820), new THREE.Vector3(-170, 410, -635), new THREE.Vector3(-900, 420, -255), new THREE.Vector3(-935, 320, -600), new THREE.Vector3(31, 35, 380), new THREE.Vector3(188, 232, -640)];
+    var materiala = 0,
+        materialb = 0,
+        materialc = 0,
+        materiald = 0,
+        materiale = 0,
+        materialf = 0,
+        _0x1fbcx2a0 = 0,
+        _0x1fbcx2a1 = 0,
+        _0x1fbcx2a2 = 0,
+        _0x1fbcx2a3 = 0;
+    var _0x1fbcx2a4 = new P360D.InfoPointManager(material9, _0x1fbcx2d7, browser);
+    infoPoints.push(_0x1fbcx2a4);
+    scene.add(_0x1fbcx2a4);
+
+
+
+    pxloader.addEventListener(Event.PROGRESS, _0x1fbcx2bf); //during progress function is called from here 
+    pxloader.addEventListener(Event.COMPLETE,  _0x1fbcx2c0); // after loading this function is called
+
+    function _0x1fbcx2bf(event) {
+        var _0x1fbcx1cd = 214;
+        if (event.totalCount) {
+            _0x1fbcx1cd = Math.floor(_0x1fbcx1cd * event.completedCount / event.totalCount);
+            _0x1fbcx27a.style.width = _0x1fbcx1cd + "px";
+        };
+    }
+    /*
+    this function is called when all images are loaded by pxloader
+
+     */
+
+    function _0x1fbcx2c0(event) {
+      
+        var crossoriginURL = "http://www.plus360degrees.com/demos/interiorapt/";
+        for(var i = 0, count = clothLoadedImages.length; i < count; i++){
+
+            var clothTexture = new THREE.Texture(clothLoadedImages[i]);
+                clothTexture.anisotropy = 8;
+                clothTexture.wrapS = clothTexture.wrapT = THREE.RepeatWrapping;
+                clothTexture.repeat.set(20, 20);
+                clothTexture.needsUpdate = true;
+                allclothTextures.push(clothTexture);
+
+        };
+        for(var i = 0, count = miscLoadedImages.length; i < count; i++){
+
+             var miscTexture = new THREE.Texture(miscLoadedImages[i]);
+                miscTexture.anisotropy = 8;
+                miscTexture.wrapS = miscTexture.wrapT = THREE.RepeatWrapping;
+                miscTexture.repeat.set(16, 16);
+                miscTexture.needsUpdate = true;
+                allmiscTextures.push(miscTexture);
+
+        };
+        for(var i = 0, count = tileLoadedImages.length; i < count; i++){
+        
+           var tilesTexture = new THREE.Texture(tileLoadedImages[i]);
+                tilesTexture.anisotropy = 8;
+                tilesTexture.wrapS = tilesTexture.wrapT = THREE.RepeatWrapping;
+                tilesTexture.repeat.set(16, 16);
+                tilesTexture.needsUpdate = true;
+                alltilesTextures.push(tilesTexture);
+
+
+        };
+        for(var i = 0, count = clothbuttonLoadedImages.length; i < count; i++){
+                     clothButtonImages.push(clothbuttonLoadedImages[i]);
+
+
+        };
+        for (var i = 0, count = LoadedImages.length; i < count; i++) {
+            LoadedImages[i].crossOrigin = crossoriginURL;
+           
+                      // console.log(testimages)
+            // if (i >= 0 && i <= 17) {
+            //     var clothTexture = new THREE.Texture(LoadedImages[i]);
+            //     clothTexture.anisotropy = 8;
+            //     clothTexture.wrapS = clothTexture.wrapT = THREE.RepeatWrapping;
+            //     clothTexture.repeat.set(20, 20);
+            //     clothTexture.needsUpdate = true;
+            //     allclothTextures.push(clothTexture);
+            // };
+            // if (i >= 18 && i <= 29) {
+            //     var miscTexture = new THREE.Texture(LoadedImages[i]);
+            //     miscTexture.anisotropy = 8;
+            //     miscTexture.wrapS = miscTexture.wrapT = THREE.RepeatWrapping;
+            //     miscTexture.repeat.set(16, 16);
+            //     miscTexture.needsUpdate = true;
+            //     allmiscTextures.push(miscTexture);
+            // };
+            // if (i >= 30 && i <= 49) {
+            //     var tilesTexture = new THREE.Texture(LoadedImages[i]);
+            //     tilesTexture.anisotropy = 8;
+            //     tilesTexture.wrapS = tilesTexture.wrapT = THREE.RepeatWrapping;
+            //     tilesTexture.repeat.set(16, 16);
+            //     tilesTexture.needsUpdate = true;
+            //     alltilesTextures.push(tilesTexture);
+            // };
+            // if (i >= 50 && i <= 63) {
+            //     var wallsTexture = new THREE.Texture(LoadedImages[i]);
+            //     wallsTexture.anisotropy = 8;
+            //     wallsTexture.wrapS = wallsTexture.wrapT = THREE.RepeatWrapping;
+            //     wallsTexture.repeat.set(6, 6);
+            //     wallsTexture.needsUpdate = true;
+            //     allwallsTextures.push(wallsTexture);
+            // };
+            // if (i >= 64 && i <= 95) {
+            //     var woodsTexture = new THREE.Texture(LoadedImages[i]);
+            //     woodsTexture.anisotropy = 8;
+            //     woodsTexture.wrapS = woodsTexture.wrapT = THREE.RepeatWrapping;
+            //     woodsTexture.repeat.set(10, 10);
+            //     woodsTexture.needsUpdate = true;
+            //     allwoodsTextures.push(woodsTexture);
+            // };
+            // if (i >= 96 && i <= 113) {
+            //     clothButtonImages.push(LoadedImages[i])
+            // };
+            if (i >= 114 && i <= 125) {
+                miscButtonImages.push(LoadedImages[i])
+            };
+            if (i >= 126 && i <= 145) {
+                tilesButtonImages.push(LoadedImages[i])
+            };
+            if (i >= 146 && i <= 159) {
+                wallsButtonImages.push(LoadedImages[i])
+            };
+            if (i >= 160 && i <= 191) {
+                woodsButtonImages.push(LoadedImages[i])
+            };
+            if (i >= 192 && i <= 203) {
+                var bumpmapsTexture = new THREE.Texture(LoadedImages[i]);
+                bumpmapsTexture.anisotropy = 8;
+                bumpmapsTexture.wrapS = bumpmapsTexture.wrapT = THREE.RepeatWrapping;
+                bumpmapsTexture.needsUpdate = true;
+                allbumptextures.push(bumpmapsTexture);
+            };
+            if (i >= 204 && i <= 209) {
+                skybox.images.push(LoadedImages[i]);
+                skybox.needsUpdate = true;
+                skybox.flipY = false;
+                skybox.format = THREE.RGBFormat;
+            };
+            if (i >= 210 && i <= 221) {
+                extraImages.push(LoadedImages[i])
+            };
+        };
+        /*
+        Top 5 links are created by this code uncomment the code so that you can view all links there
+
+
+         */
+
+        for (var i = 0; i < 5; i++) {
+        
+            var singletopbutton = P360D.DOM.div("topButton" + i);
+            singletopbutton.classList.add("button");
+            singletopbutton.style.left = (i * 45) + "px";
+            singletopbutton.appendChild(extraImages[i]);
+            TopButtons.push(singletopbutton);
+            toolBarTop.appendChild(singletopbutton);
+            TopButtons[i].addEventListener(browser.clickEvent, function(event) {
+                switch (TopButtons.indexOf(event.currentTarget)) {
+                    case 0:
+                        browser.toggleFullscreen();
+                        break;;
+                    case 1:
+                        window.open("http://www.plus360degrees.com/", "_blank");
+                        return false;
+                        break;;
+                    case 2:
+                        window.open("http://www.facebook.com/sharer/sharer.php?t=Home+Colors,+an+interactive+3D+interior+made+by+plus360degrees&u=http://homecolors.plus360degrees.com/", "PopUpWindow", "width=570, height=600");
+                        return false;
+                        break;;
+                    case 3:
+                        window.open("https://twitter.com/intent/tweet?source=webclient&text=Home+Colors,+an+interactive+3D+interior+made+by+@plus360degrees.+http://homecolors.plus360degrees.com/+%23threejs+%23WebGL+%23GSAP+%23HTML5", "PopUpWindow", "width=600, height=600");
+                        return false;
+                        break;;
+                    case 4:
+                        window.open("https://plus.google.com/share?url=http://homecolors.plus360degrees.com/", "PopUpWindow", "width=600, height=600");
+                        return false;
+                        break;;
+                }
+            }, false);
+        };
+        var Rooms = ["LIVINGROOM"];
+        var _0x1fbcx2ca = [],
+            _0x1fbcx2cb = [];
+        var titleDiv = P360D.DOM.div("title");
+        titleDiv.appendChild(extraImages[11]);
+        for (var i = 0; i < Rooms.length; i++) {
+            var NavigationButtons = P360D.DOM.div(Rooms[i] + "div");
+            NavigationButtons.classList.add("mainMenuButton");
+            var innerglowDiv = P360D.DOM.div("innerGlow" + Rooms[i]);
+            innerglowDiv.classList.add("innerGlow");
+            innerglowDiv.appendChild(extraImages[6].cloneNode(true));
+            _0x1fbcx2ca.push(innerglowDiv);
+            var textcontainerDiv = P360D.DOM.div(Rooms[i] + "text");
+            textcontainerDiv.classList.add("textContainer");
+            textcontainerDiv.textContent = Rooms[i];
+            _0x1fbcx2cb.push(textcontainerDiv);
+            var _0x1fbcx2d1 = P360D.DOM.canvas(Rooms[i] + "canvas");
+            material5.push(_0x1fbcx2d1);
+            var _0x1fbcx2d2 = _0x1fbcx2d1.getContext("2d");
+            material6.push(_0x1fbcx2d2);
+            NavigationButtons.appendChild(_0x1fbcx2d1);
+            material4.push(innerglowDiv);
+            mainMenu.appendChild(NavigationButtons);
+            mainMenu.appendChild(innerglowDiv);
+            mainMenu.appendChild(textcontainerDiv);
+            switch (browser.getScreenType()) {
+                case "phone":
+                    _0x1fbcx2d1.width = 112;
+                    _0x1fbcx2d1.height = 150;
+                    NavigationButtons.style.left = (i * 116) + "px";
+                    innerglowDiv.style.left = (i * 116) + "px";
+                    textcontainerDiv.style.left = (i * 116) + "px";
+                    _0x1fbcx2e1({
+                        canvas: material5[i],
+                        context: material6[i],
+                        image: extraImages[i + 7],
+                        desw: 112,
+                        desh: 150
+                    });
+                    break;;
+                case "tablet":
+                    _0x1fbcx2d1.width = 158;
+                    _0x1fbcx2d1.height = 210;
+                    NavigationButtons.style.left = (i * 164) + "px";
+                    innerglowDiv.style.left = (i * 164) + "px";
+                    textcontainerDiv.style.left = (i * 164) + "px";
+                    _0x1fbcx2e1({
+                        canvas: material5[i],
+                        context: material6[i],
+                        image: extraImages[i + 7],
+                        desw: 158,
+                        desh: 210
+                    });
+                    break;;
+                case "desktop":
+                    _0x1fbcx2d1.width = 225;
+                    _0x1fbcx2d1.height = 300;
+                    NavigationButtons.style.left = (i * 235) + "px";
+                    innerglowDiv.style.left = (i * 235) + "px";
+                    textcontainerDiv.style.left = (i * 235) + "px";
+                    _0x1fbcx2e1({
+                        canvas: material5[i],
+                        context: material6[i],
+                        image: extraImages[i + 7],
+                        desw: 225,
+                        desh: 300
+                    });
+                    break;;
+            };
+            material4[i].addEventListener(browser.endEvent, loadRoom, false);
+            material4[i].addEventListener(MouseEvent.MOUSE_OVER, function(event) {
+                TweenMax.to(_0x1fbcx2cb[material4.indexOf(event.currentTarget)], 0.2, {
+                    backgroundColor: "#ff3300",
+                    ease: Linear.easeNone
+                });
+                TweenMax.to(_0x1fbcx2ca[material4.indexOf(event.currentTarget)], 0.2, {
+                    opacity: 0.0,
+                    ease: Linear.easeNone
+                });
+            }, false);
+            material4[i].addEventListener(MouseEvent.MOUSE_OUT, function(event) {
+                TweenMax.to(_0x1fbcx2cb[material4.indexOf(event.currentTarget)], 0.2, {
+                    backgroundColor: "#111111",
+                    ease: Linear.easeNone
+                });
+                TweenMax.to(_0x1fbcx2ca[material4.indexOf(event.currentTarget)], 0.2, {
+                    opacity: 1.0,
+                    ease: Linear.easeNone
+                });
+            }, false);
+        };
+        mainMenu.appendChild(titleDiv);
+        bottomButtons[1].appendChild(extraImages[5]);
+        livingroomGUIPanel = new P360D.LivingroomGUI(clothButtonImages, wallsButtonImages, woodsButtonImages, miscButtonImages);
+        document.body.appendChild(livingroomGUIPanel.container);
+        guis.push(livingroomGUIPanel);
+        livingroomGUIPanel.container.addEventListener(browser.clickEvent, function(event) {
+            materiala = livingroomGUIPanel.chairIndex;
+            materialb = livingroomGUIPanel.ottomansIndex;
+            materialc = livingroomGUIPanel.pillowsIndex;
+            materiale = livingroomGUIPanel.closetIndex;
+            materiald = livingroomGUIPanel.bifetIndex;
+            _0x1fbcx2a2 = livingroomGUIPanel.curtainsIndex;
+            materialf = livingroomGUIPanel.wallFront1Index;
+            _0x1fbcx2a0 = livingroomGUIPanel.wallFront2Index;
+            _0x1fbcx2a1 = livingroomGUIPanel.wallLeftIndex;
+            _0x1fbcx2a3 = livingroomGUIPanel.floorIndex;
+            livingroom.replaceChairsTextile(materiala);
+            livingroom.replaceOttomansTextile(materialb);
+            livingroom.replacePillowsTextile(materialc);
+            livingroom.replaceClosetMaterial(materiale);
+            livingroom.replaceBifetMaterial(materiald);
+            livingroom.replaceCurtainsTextile(_0x1fbcx2a2);
+            livingroom.replaceWallFront1Material(materialf);
+            livingroom.replaceWallFront2Material(_0x1fbcx2a0);
+            livingroom.replaceWallLeftMaterial(_0x1fbcx2a1);
+            livingroom.replaceFloor(_0x1fbcx2a3);
+        }, false);
+
+
+        if (!isMobile) {
+            var _0x1fbcx2d3 = new THREE.PlaneGeometry(2000, 2000);
+            groundMirror = new THREE.Mirror(renderer, camera, {
+                clipBias: 0.00003,
+                textureWidth: 1024,
+                textureHeight: 1024,
+                color: floorColors[0]
+            });
+            groundMirror.material.uniforms.opacity.value = floorReflectivities[0];
+            groundMirror.material.transparent = true;
+            groundMirror.material.depthWrite = false;
+            var _0x1fbcx2d4 = new THREE.Mesh(_0x1fbcx2d3, groundMirror.material);
+            _0x1fbcx2d4.add(groundMirror);
+            _0x1fbcx2d4.rotateX(-Math.PI / 2);
+            _0x1fbcx2d4.position.set(0, 1, 0);
+            scene.add(_0x1fbcx2d4);
+        };
+        render();
+        resize();
+        loadRoom();
+        pxloader = null;
+        TweenMax.to(_0x1fbcx278, 0.5, {
+            opacity: 0.0,
+            delay: 3.0
+        });
+        TweenMax.to(progressBGInit, 0.5, {
+            opacity: 0.0,
+            delay: 4.0,
+            onComplete: function() {
+                _0x1fbcx278.removeChild(_0x1fbcx279);
+                _0x1fbcx278.removeChild(_0x1fbcx27a);
+                progressBGInit.removeChild(_0x1fbcx278);
+                document.body.removeChild(progressBGInit);
+                progressBGInit = _0x1fbcx278 = _0x1fbcx279 = _0x1fbcx27a = null;
+                mouseBlocker.style.visibility = "hidden";
+            }
+        });
+    }
+
+    function callbackfunction() {
+        VIEW_WIDTH = window.innerWidth;
+        VIEW_HEIGHT = window.innerHeight;
+        if (roomIndex == 3) {
+            cameraPano.aspect = VIEW_WIDTH / VIEW_HEIGHT;
+            cameraPano.updateProjectionMatrix();
+            renderer.setSize(VIEW_WIDTH, VIEW_HEIGHT);
+            renderer.render(scene, cameraPano);
+        } else {
+            camera.aspect = VIEW_WIDTH / VIEW_HEIGHT;
+            camera.updateProjectionMatrix();
+            renderer.setSize(VIEW_WIDTH, VIEW_HEIGHT);
+            renderer.render(scene, camera);
+        };
+        _0x1fbcx2dc();
+        TweenMax.to(progressBGRooms, 0.6, {
+            opacity: 0.0,
+            delay: 3.0,
+            ease: Sine.easeOut
+        });
+        TweenMax.to(mainMenu, 0.6, {
+            opacity: 0.0,
+            delay: 3.8,
+            ease: Sine.easeOut
+        });
+        toolBarBottom.style.visibility = "visible";
+        customizeButton.style.visibility = "visible";
+        TweenMax.to([viewport, toolBarBottom, customizeButton], 0.6, {
+            opacity: 1.0,
+            delay: 3.8,
+            ease: Sine.easeOut,
+            onComplete: _0x1fbcx2d6
+        });
+    }
+
+    function _0x1fbcx2d6() {
+        isHome = false;
+        isRendering = true;
+        controls[roomIndex].enabledAll(true);
+        mouseBlocker.style.visibility = "hidden";
+        progressBGRooms.style.visibility = "hidden";
+        _0x1fbcx27d.style.width = "0px";
+        _0x1fbcx27e.style.width = "0px";
+    }
+
+    function _0x1fbcx2d7(event) {
+        var imageIndex = _0x1fbcx2a4.sprites.indexOf(event.currentTarget);
+        switch (imageIndex) {
+            case 0:
+                materiala++;
+                if (materiala == 18) {
+                    materiala = 0
+                };
+                livingroomGUIPanel.chairIndex = materiala;
+                livingroom.replaceChairsTextile(materiala);
+                break;;
+            case 1:
+                materialb++;
+                if (materialb == 18) {
+                    materialb = 0
+                };
+                livingroomGUIPanel.ottomansIndex = materialb;
+                livingroom.replaceOttomansTextile(materialb);
+                break;;
+            case 2:
+                materialc++;
+                if (materialc == 18) {
+                    materialc = 0
+                };
+                livingroomGUIPanel.pillowsIndex = materialc;
+                livingroom.replacePillowsTextile(materialc);
+                break;;
+            case 3:
+                materiald++;
+                if (materiald == 12) {
+                    materiald = 0
+                };
+                livingroomGUIPanel.bifetIndex = materiald;
+                livingroom.replaceBifetMaterial(materiald);
+                break;;
+            case 4:
+                materiale++;
+                if (materiale == 12) {
+                    materiale = 0
+                };
+                livingroomGUIPanel.closetIndex = materiale;
+                livingroom.replaceClosetMaterial(materiale);
+                break;;
+            case 5:
+                materialf++;
+                if (materialf == 14) {
+                    materialf = 0
+                };
+                livingroomGUIPanel.wallFront1Index = materialf;
+                livingroom.replaceWallFront1Material(materialf);
+                break;;
+            case 6:
+                _0x1fbcx2a0++;
+                if (_0x1fbcx2a0 == 14) {
+                    _0x1fbcx2a0 = 0
+                };
+                livingroomGUIPanel.wallFront2Index = _0x1fbcx2a0;
+                livingroom.replaceWallFront2Material(_0x1fbcx2a0);
+                break;;
+            case 7:
+                _0x1fbcx2a2++;
+                if (_0x1fbcx2a2 == 12) {
+                    _0x1fbcx2a2 = 0
+                };
+                livingroomGUIPanel.curtainsIndex = _0x1fbcx2a2;
+                livingroom.replaceCurtainsTextile(_0x1fbcx2a2);
+                break;;
+            case 8:
+                _0x1fbcx2a1++;
+                if (_0x1fbcx2a1 == 14) {
+                    _0x1fbcx2a1 = 0
+                };
+                livingroomGUIPanel.wallLeftIndex = _0x1fbcx2a1;
+                livingroom.replaceWallLeftMaterial(_0x1fbcx2a1);
+                break;;
+            case 9:
+                _0x1fbcx2a3++;
+                if (_0x1fbcx2a3 == 14) {
+                    _0x1fbcx2a3 = 0
+                };
+                livingroomGUIPanel.floorIndex = _0x1fbcx2a3;
+                livingroom.replaceFloor(_0x1fbcx2a3);
+                break;;
+            case 10:
+                livingroom.renderToTV(renderer, scene, camera);
+                break;;
+        };
+    }
+
+
+
+
+    function loadRoom(event) {
+        roomIndex = 0; /*material4.indexOf(event.currentTarget)*/
+        mouseBlocker.style.visibility = "visible";
+        viewport.style.visibility = "visible";
+        isRendering = false;
+        switch (roomIndex) {
+            case 0:
+                if (livingroom === undefined) {
+                    progressBGRooms.style.visibility = "visible";
+                    TweenMax.to(progressBGRooms, 0.6, {
+                        opacity: 1.0,
+                        onComplete: function() {
+                            livingroom = new P360D.Livingroom(allclothTextures, allwallsTextures, allwoodsTextures, allmiscTextures, allbumptextures, skybox, groundMirror, isMobile, callbackfunction);
+                            scene.add(livingroom);
+                            if (!isMobile) {
+                                groundMirror.material.uniforms.mirrorColor.value.setStyle(floorColors[_0x1fbcx2a3]);
+                                groundMirror.material.uniforms.opacity.value = floorReflectivities[_0x1fbcx2a3];
+                            };
+                        }
+                    });
+                } else {
+                    if (livingroom.isLoaded) {
+                        isHome = false;
+                        livingroom.visible = true;
+                        _0x1fbcx2dd();
+                        _0x1fbcx2dc();
+                    }
+                };
+                break;;
+
+
+        };
+        toggleInfopoints();
+        if (roomIndex == 3) {
+            manager.setCamera(cameraPano);
+            if (!isMobile) {
+                groundMirror.setCamera(cameraPano);
+                groundMirror.render();
+            };
+            renderer.render(scene, cameraPano);
+        } else {
+            manager.setCamera(camera);
+            if (!isMobile) {
+                groundMirror.setCamera(camera);
+                groundMirror.render();
+            };
+            renderer.render(scene, camera);
+        };
+    }
+
+    function _0x1fbcx2dc() {
+        camera.position.copy(cameraPositions[roomIndex]);
+        controls[roomIndex].update();
+        if (!isMobile) {
+            groundMirror.render()
+        };
+        if (roomIndex == 3) {
+            renderer.render(scene, cameraPano)
+        } else {
+            renderer.render(scene, camera)
+        };
+        _0x1fbcx2f4(false);
+    }
+
+    function _0x1fbcx2dd() {
+        TweenMax.to(mainMenu, 0.6, {
+            opacity: 0.0,
+            ease: Sine.easeOut
+        });
+        toolBarBottom.style.visibility = "visible";
+        customizeButton.style.visibility = "visible";
+        TweenMax.to([viewport, toolBarBottom, customizeButton], 0.6, {
+            opacity: 1.0,
+            delay: 0.0,
+            ease: Sine.easeOut,
+            onComplete: function() {
+                isRendering = true;
+                controls[roomIndex].enabledAll(true);
+                mouseBlocker.style.visibility = "hidden";
+            }
+        });
+        if (!isMobile) {
+            groundMirror.material.uniforms.mirrorColor.value.setStyle(floorColors[_0x1fbcx2a3]);
+            groundMirror.material.uniforms.opacity.value = floorReflectivities[_0x1fbcx2a3];
+        };
+    }
+
+    function gobacktohome() {
+        if (!isHome) {
+            mouseBlocker.style.visibility = "visible";
+            transitionSprite.style.visibility = "visible";
+            isRendering = false;
+            controls[roomIndex].enabledAll(false);
+            var image = new Image();
+            if (roomIndex == 3) {
+                geometry2.position.copy(cameraPano.position)
+            } else {
+                geometry2.position.copy(camera.position)
+            };
+            geometry2.lookAt(controls[roomIndex].target);
+            TweenMax.to(transitionSprite, 0.3, {
+                opacity: 1.0,
+                onComplete: function() {
+                    if (isInfoPoints) {
+                        infoPoints[roomIndex].enabled(false)
+                    };
+                    renderer.clear();
+                    renderer.render(scene, geometry2);
+                    image.src = renderer.context.canvas.toDataURL("image/png;base64", 1.0);
+                    renderer.clear();
+                    image.addEventListener(Event.LOAD, function(event) {
+                        event.preventDefault();
+                        if (isInfoPoints) {
+                            infoPoints[roomIndex].enabled(true)
+                        };
+                        switch (browser.getScreenType()) {
+                            case "phone":
+                                material6[roomIndex].drawImage(event.currentTarget, 0, 0, 112, 150);
+                                break;;
+                            case "tablet":
+                                material6[roomIndex].drawImage(event.currentTarget, 0, 0, 158, 210);
+                                break;;
+                            case "desktop":
+                                material6[roomIndex].drawImage(event.currentTarget, 0, 0, 225, 300);
+                                break;;
+                        };
+                        TweenMax.to(transitionSprite, 0.6, {
+                            opacity: 0.0,
+                            delay: 0.0,
+                            ease: Sine.easeOut,
+                            onComplete: _0x1fbcx2df
+                        });
+                        viewport.style.opacity = "0.0";
+                        toolBarBottom.style.opacity = "0.0";
+                        customizeButton.style.opacity = "0.0";
+                        mainMenu.style.opacity = "1.0";
+                        event.stopPropagation();
+                    }, false);
+                    if (roomIndex == 3) {
+                        renderer.render(scene, cameraPano)
+                    } else {
+                        renderer.render(scene, camera)
+                    };
+                    if (isMenu) {
+                        guis[roomIndex].container.style.right = "-310px";
+                        isMenu = false;
+                    };
+                }
+            });
+        }
+    }
+
+    function _0x1fbcx2df() {
+        isHome = true;
+        if (livingroom) {
+            livingroom.visible = false
+        };
+
+        if (roomIndex == 3) {
+            cameraPositions[roomIndex].copy(cameraPano.position)
+        } else {
+            cameraPositions[roomIndex].copy(camera.position)
+        };
+        customizeButton.innerHTML = "CUSTOMIZE <";
+        customizeButton.style.right = "0px";
+        customizeButton.style.bottom = "5px";
+        mouseBlocker.style.visibility = "hidden";
+        viewport.style.visibility = "hidden";
+        toolBarBottom.style.visibility = "hidden";
+        customizeButton.style.visibility = "hidden";
+        transitionSprite.style.visibility = "hidden";
+    }
+    var _0x1fbcx2e0 = 0;
+
+    function _0x1fbcx2e1(_0x1fbcx2e2) {
+        if (!_0x1fbcx2e2.canvas) {
+            throw ("A canvas is required")
+        };
+        if (!_0x1fbcx2e2.image) {
+            throw ("Image is required")
+        };
+        var _0x1fbcx2e3 = _0x1fbcx2e2.canvas,
+            _0x1fbcx2e4 = _0x1fbcx2e2.context || _0x1fbcx2e3.getContext("2d"),
+            image = _0x1fbcx2e2.image,
+            _0x1fbcx2e5 = _0x1fbcx2e2.srcx || 0,
+            _0x1fbcx2e6 = _0x1fbcx2e2.srcy || 0,
+            _0x1fbcx2e7 = _0x1fbcx2e2.srcw || image.naturalWidth,
+            _0x1fbcx2e8 = _0x1fbcx2e2.srch || image.naturalHeight,
+            _0x1fbcx2e9 = _0x1fbcx2e2.desx || _0x1fbcx2e5,
+            _0x1fbcx2ea = _0x1fbcx2e2.desy || _0x1fbcx2e6,
+            _0x1fbcx2eb = _0x1fbcx2e2.desw || _0x1fbcx2e7,
+            _0x1fbcx2ec = _0x1fbcx2e2.desh || _0x1fbcx2e8,
+            _0x1fbcx2ed = _0x1fbcx2e2.auto,
+            _0x1fbcx2ee = window.devicePixelRatio || 1,
+            _0x1fbcx2ef = _0x1fbcx2e4.webkitBackingStorePixelRatio || _0x1fbcx2e4.mozBackingStorePixelRatio || _0x1fbcx2e4.msBackingStorePixelRatio || _0x1fbcx2e4.oBackingStorePixelRatio || _0x1fbcx2e4.backingStorePixelRatio || 1,
+            _0x1fbcx2f0 = _0x1fbcx2ee / _0x1fbcx2ef;
+        if (typeof _0x1fbcx2ed === "undefined") {
+            _0x1fbcx2ed = true
+        };
+        if (_0x1fbcx2ed && _0x1fbcx2ee !== _0x1fbcx2ef) {
+            var _0x1fbcx2f1 = _0x1fbcx2e3.width;
+            var _0x1fbcx2f2 = _0x1fbcx2e3.height;
+            _0x1fbcx2e3.width = _0x1fbcx2f1 * _0x1fbcx2f0;
+            _0x1fbcx2e3.height = _0x1fbcx2f2 * _0x1fbcx2f0;
+            _0x1fbcx2e3.style.width = _0x1fbcx2f1 + "px";
+            _0x1fbcx2e3.style.height = _0x1fbcx2f2 + "px";
+            _0x1fbcx2e4.scale(_0x1fbcx2f0, _0x1fbcx2f0);
+        };
+        _0x1fbcx2e4.clearRect(_0x1fbcx2e5, _0x1fbcx2e6, _0x1fbcx2e7, _0x1fbcx2e8);
+        _0x1fbcx2e4.drawImage(image, _0x1fbcx2e5, _0x1fbcx2e6, _0x1fbcx2e7, _0x1fbcx2e8, _0x1fbcx2e9, _0x1fbcx2ea, _0x1fbcx2eb, _0x1fbcx2ec);
+    }
+
+    function toggleInfopoints() {
+        if (isInfoPoints) {
+            infoPoints.forEach(function(url5) {
+                url5.enabled(false)
+            });
+            infoPoints[roomIndex].enabled(true);
+        } else {
+            infoPoints.forEach(function(url5) {
+                url5.enabled(false)
+            })
+        }
+    }
+
+    function _0x1fbcx2f4(value) {
+        for (var i = 0, count = controls.length; i < count; i++) {
+            controls[i].enabledAll(value)
+        }
+    }
+    window.addEventListener(Event.RESIZE, resize, false);
+    livCamControls = new THREE.OrbitControls(camera, viewport);
+    livCamControls.target = new THREE.Vector3(0, 120, 0);
+    livCamControls.minDistance = 700;
+    livCamControls.maxDistance = 1000;
+    livCamControls.rotateSpeed = 0.07;
+    livCamControls.constraintPan = true;
+    livCamControls.minPanAngle = THREE.Math.degToRad(-60);
+    livCamControls.maxPanAngle = THREE.Math.degToRad(45);
+    livCamControls.minPolarAngle = THREE.Math.degToRad(73);
+    livCamControls.maxPolarAngle = THREE.Math.degToRad(89);
+    controls.push(livCamControls);
+
+    window.removeEventListener(Event.LOAD, init, false);
+}
+
+function resize() {
+    VIEW_WIDTH = window.innerWidth;
+    VIEW_HEIGHT = window.innerHeight;
+    cameraPano.aspect = VIEW_WIDTH / VIEW_HEIGHT;
+    cameraPano.updateProjectionMatrix();
+    camera.aspect = VIEW_WIDTH / VIEW_HEIGHT;
+    camera.updateProjectionMatrix();
+    renderer.setSize(VIEW_WIDTH, VIEW_HEIGHT);
+    toolBarBottom.style.webkitTransform = "translate( 5px, " + (VIEW_HEIGHT - 45) + "px)";
+    toolBarBottom.style.MozTransform = "translate( 5px, " + (VIEW_HEIGHT - 45) + "px)";
+    toolBarBottom.style.msTransform = "translate( 5px, " + (VIEW_HEIGHT - 45) + "px)";
+    toolBarBottom.style.OTransform = "translate( 5px, " + (VIEW_HEIGHT - 45) + "px)";
+    toolBarBottom.style.transform = "translate( 5px, " + (VIEW_HEIGHT - 45) + "px)";
+}
+
+function render() {   // render function to create 
+    requestAnimationFrame(render);
+    if (isRendering) {
+        if (!isHome) {
+            controls[roomIndex].update();
+            if (isInfoPoints) {
+                infoPoints[roomIndex].update(camera)
+            };
+            if (roomIndex == 3) {
+                if (!isMobile) {
+                    groundMirror.render()
+                };
+                renderer.render(scene, cameraPano);
+            } else {
+                if (!isMobile) {
+                    groundMirror.render()
+                };
+                renderer.render(scene, camera);
+            };
+        }
+    };
+}
